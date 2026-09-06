@@ -10,8 +10,8 @@ build/
 .env.local
 .env.*.local
 
-# prisma
-prisma/migrations/
+# prisma (las migraciones se versionan en Git)
+# generated client output va a node_modules (ignorado arriba)
 
 # logs / os
 npm-debug.log*
