@@ -1,6 +1,7 @@
-// Prisma schema — Fase 1: solo datasource + generator.
-// No crear modelos definitivos todavía (catálogo, usuarios, pedidos, IA).
-// Se definirán en la fase "Modelo de datos".
+// Prisma schema — Fase 2: catálogo + setups (lectura).
+// Alcance estricto: Product, Setup, SetupItem + enums.
+// Fuera de esta fase: User, Cart, Order, SavedSetup y persistencia del
+// cuestionario IA (ver docs/product.md y docs/data-model.md).
 
 generator client {
   provider = "prisma-client-js"
@@ -9,4 +10,80 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum Category {
+  Lighting
+  Organization
+  Peripherals
+  Monitors
+  Stands
+  Decoration
+}
+
+enum Style {
+  Minimal
+  Natural
+  Dark
+  RGB
+}
+
+enum Use {
+  Work
+  Gaming
+  Study
+  Streaming
+  Mixed
+}
+
+enum Slot {
+  Monitor
+  MonitorArm
+  Keyboard
+  Mouse
+  DeskMat
+  Lighting
+  Organization
+  Decoration
+}
+
+model Product {
+  id         String     @id @default(cuid())
+  slug       String     @unique
+  name       String
+  category   Category
+  styles     Style[]
+  uses       Use[]
+  priceCents Int
+  imageUrl   String?
+  createdAt  DateTime   @default(now())
+  setupItems SetupItem[]
+
+  @@index([category])
+}
+
+model Setup {
+  id        String      @id @default(cuid())
+  slug      String      @unique
+  name      String
+  use       Use
+  style     Style
+  createdAt DateTime    @default(now())
+  items     SetupItem[]
+
+  @@index([use])
+  @@index([style])
+}
+
+model SetupItem {
+  id        String  @id @default(cuid())
+  setupId   String
+  slot      Slot
+  productId String
+
+  setup   Setup   @relation(fields: [setupId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([setupId, slot])
+  @@index([productId])
 }
