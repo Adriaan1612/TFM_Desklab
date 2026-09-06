@@ -1,46 +1,52 @@
 # AGENTS.md — DeskLab
 
-## Qué es DeskLab
+## Qué es
 DeskLab es el TFM del Master en AI Development de BigSchool: un ecommerce de
-setups de escritorio, con una futura funcionalidad de IA para ayudar al usuario
-a crear un setup personalizado.
+setups de escritorio que ayuda a descubrir, montar y personalizar un espacio
+coherente. No es una tienda genérica de periféricos.
 
-## Objetivo del proyecto
-Construir paso a paso una base sólida y evolutiva: catálogo, personalización de
-setups, carrito/checkout, cuentas y, al final, integración de IA. Fase 1 es solo
-inicialización y arquitectura, sin funcionalidades todavía.
+Tagline: **Tu rincón, bien montado.**
 
-## Stack tecnológico previsto
+Visión completa del producto: `docs/product.md`.
+
+## Stack
 - Frontend: React + TypeScript + Vite
 - Backend: Node.js + TypeScript + Fastify
-- Base de datos: PostgreSQL + Prisma
-- Styling frontend: Tailwind CSS
+- DB: PostgreSQL + Prisma
+- Styling: Tailwind CSS
 - Tests: Vitest
 - Monorepo npm workspaces: `apps/web`, `apps/api`, `packages/shared`, `prisma/`, `docs/`
 
-## Principios de desarrollo
-- Mantener el proyecto simple.
+Arranque y estructura: ver `README.md`.
+
+## Reglas de trabajo
+- Mantener el proyecto sencillo y controlado.
 - Evitar sobreingeniería.
 - TypeScript estricto.
 - Código mantenible y testeable.
 - Separar frontend, backend y dominio.
-- Priorizar una buena UX.
-- No implementar funcionalidades que no hayan sido solicitadas.
-- Antes de hacer cambios arquitectónicos importantes, explicar la decisión.
-- Trabajar siempre de forma incremental.
+- Priorizar UX, claridad y mantenibilidad.
+- No inventar funcionalidades.
+- No tomar decisiones importantes sin explicar primero el motivo.
+- Construir de forma incremental.
+- Si algo no está definido, preguntar antes de asumir.
+- No avanzar a una nueva fase ni implementar decisiones no confirmadas sin confirmación explícita del usuario.
 
-## Project Roadmap
-Construiremos el proyecto progresivamente, fase a fase:
+## Docs
+- `docs/product.md` — qué es DeskLab y qué debe hacer (fuente única de alcance).
+- `docs/data-model.md` — entidades y relaciones (TBD hasta su fase).
+- `docs/api.md` — endpoints (TBD hasta su fase).
+- `docs/design-system.md` — diseño (TBD hasta su fase).
+- `docs/ai.md` — comportamiento de la IA (TBD hasta su fase).
+- `docs/architecture.md` — arquitectura base del monorepo.
 
-1. Inicialización y arquitectura
-2. Modelo de datos
-3. Backend/API
-4. Design system y frontend
-5. Catálogo y productos
-6. Setups y personalización
-7. Carrito y checkout
-8. Autenticación y cuenta
-9. Integración de IA
-10. Testing, calidad y documentación
-
-No avanzar automáticamente a la siguiente fase sin confirmación explícita.
+## Roadmap
+1. Arquitectura y modelo de datos
+2. Backend/API
+3. Design system y frontend
+4. Productos
+5. Setups y personalización
+6. Carrito y checkout
+7. Cuenta
+8. IA
+9. Testing y documentación
