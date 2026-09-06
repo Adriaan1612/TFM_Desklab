@@ -39,3 +39,8 @@ Llegan en sus fases (carrito/checkout, cuenta, IA).
 8 productos y 2 setups (`the-calm-desk`, `night-shift`) que validan las
 relaciones. El catálogo completo (30–40 productos) llega en la fase de
 Productos.
+
+## Migración inicial
+
+`20260906172734_init_catalog_setups` creada y aplicada contra PostgreSQL 16.
+Las migraciones se versionan en Git (`prisma/migrations/`).
