@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: desklab-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: desklab
+      POSTGRES_PASSWORD: desklab
+      POSTGRES_DB: desklab
+    ports:
+      - "5432:5432"
+    volumes:
+      - desklab-pgdata:/var/lib/postgresql/data
+
+volumes:
+  desklab-pgdata:
