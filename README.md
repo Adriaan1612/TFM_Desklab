@@ -1,5 +1,7 @@
 # DeskLab
 
+> Tu rincón, bien montado.
+
 Ecommerce de setups de escritorio — TFM del Master en AI Development (BigSchool).
 
 **Objetivo:** permitir a los usuarios explorar, personalizar y comprar setups de
@@ -48,4 +50,4 @@ npm run dev:web   # http://localhost:5173
 
 ## Roadmap
 
-Ver `AGENTS.md` → Project Roadmap (10 fases, construcción progresiva).
+Ver `AGENTS.md` → Roadmap y `docs/product.md` → visión completa del producto.
