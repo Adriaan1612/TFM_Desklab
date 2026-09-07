@@ -1,4 +1,4 @@
-// Seed mínimo — Fase 2. Solo catálogo + setups de lectura.
+// Seed mínimo — Fase 2/3. Solo catálogo + setups de lectura.
 // 8 productos y 2 setups para validar relaciones. El catálogo completo
 // (30–40 productos) llega en la fase de Productos.
 // Fuera de alcance: User, Cart, Order, SavedSetup, cuestionario IA.
@@ -13,6 +13,7 @@ async function main(): Promise<void> {
       slug: "monitor-27-4k",
       name: "Monitor 27 4K",
       category: "Monitors",
+      slot: "Monitor",
       styles: ["Minimal", "Dark"],
       uses: ["Work", "Gaming", "Study"],
       priceCents: 34900,
@@ -21,6 +22,7 @@ async function main(): Promise<void> {
       slug: "brazo-monitor-individual",
       name: "Brazo de monitor individual",
       category: "Stands",
+      slot: "MonitorArm",
       styles: ["Minimal", "Dark"],
       uses: ["Work", "Gaming"],
       priceCents: 8900,
@@ -29,6 +31,7 @@ async function main(): Promise<void> {
       slug: "teclado-mecanico-75",
       name: "Teclado mecánico 75%",
       category: "Peripherals",
+      slot: "Keyboard",
       styles: ["Minimal", "Dark"],
       uses: ["Work", "Gaming"],
       priceCents: 12900,
@@ -37,6 +40,7 @@ async function main(): Promise<void> {
       slug: "raton-inalambrico",
       name: "Ratón inalámbrico",
       category: "Peripherals",
+      slot: "Mouse",
       styles: ["Minimal", "Dark"],
       uses: ["Work", "Gaming", "Study"],
       priceCents: 5900,
@@ -45,6 +49,7 @@ async function main(): Promise<void> {
       slug: "alfombrilla-fieltro",
       name: "Alfombrilla de fieltro",
       category: "Peripherals",
+      slot: "DeskMat",
       styles: ["Minimal", "Natural"],
       uses: ["Work", "Study"],
       priceCents: 3500,
@@ -53,6 +58,7 @@ async function main(): Promise<void> {
       slug: "lampara-escritorio-calida",
       name: "Lámpara de escritorio cálida",
       category: "Lighting",
+      slot: "Lighting",
       styles: ["Minimal", "Natural"],
       uses: ["Work", "Study"],
       priceCents: 4500,
@@ -61,6 +67,7 @@ async function main(): Promise<void> {
       slug: "bandeja-organizadora",
       name: "Bandeja organizadora",
       category: "Organization",
+      slot: "Organization",
       styles: ["Minimal", "Natural"],
       uses: ["Work", "Study"],
       priceCents: 2900,
@@ -69,6 +76,7 @@ async function main(): Promise<void> {
       slug: "mini-planta",
       name: "Mini planta",
       category: "Decoration",
+      slot: "Decoration",
       styles: ["Natural", "Minimal"],
       uses: ["Work", "Study"],
       priceCents: 1500,
@@ -80,6 +88,7 @@ async function main(): Promise<void> {
       where: { slug: p.slug },
       update: {
         name: p.name,
+        slot: p.slot,
         priceCents: p.priceCents,
         styles: { set: [...p.styles] },
         uses: { set: [...p.uses] },
@@ -88,6 +97,7 @@ async function main(): Promise<void> {
         slug: p.slug,
         name: p.name,
         category: p.category,
+        slot: p.slot,
         styles: { set: [...p.styles] },
         uses: { set: [...p.uses] },
         priceCents: p.priceCents,

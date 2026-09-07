@@ -1,0 +1,55 @@
+import { z } from "zod";
+
+export const CategorySchema = z.enum([
+  "Lighting",
+  "Organization",
+  "Peripherals",
+  "Monitors",
+  "Stands",
+  "Decoration",
+]);
+
+export const StyleSchema = z.enum(["Minimal", "Natural", "Dark", "RGB"]);
+
+export const UseSchema = z.enum(["Work", "Gaming", "Study", "Streaming", "Mixed"]);
+
+export const SlotSchema = z.enum([
+  "Monitor",
+  "MonitorArm",
+  "Keyboard",
+  "Mouse",
+  "DeskMat",
+  "Lighting",
+  "Organization",
+  "Decoration",
+]);
+
+const priceCents = z.coerce.number().int().min(0);
+
+export const ProductsQuerySchema = z.object({
+  category: CategorySchema.optional(),
+  style: StyleSchema.optional(),
+  use: UseSchema.optional(),
+  minPriceCents: priceCents.optional(),
+  maxPriceCents: priceCents.optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20),
+});
+
+export const SetupsQuerySchema = z.object({
+  use: UseSchema.optional(),
+  style: StyleSchema.optional(),
+});
+
+export const SubstitutesQuerySchema = z.object({
+  slot: SlotSchema,
+});
+
+export function zodMessage(error: z.ZodError): string {
+  return error.issues
+    .map((issue) => {
+      const path = issue.path.join(".") || "query";
+      return `${path}: ${issue.message}`;
+    })
+    .join("; ");
+}

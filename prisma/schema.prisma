@@ -52,6 +52,7 @@ model Product {
   slug       String     @unique
   name       String
   category   Category
+  slot       Slot
   styles     Style[]
   uses       Use[]
   priceCents Int
@@ -60,6 +61,7 @@ model Product {
   setupItems SetupItem[]
 
   @@index([category])
+  @@index([slot])
 }
 
 model Setup {

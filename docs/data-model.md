@@ -6,7 +6,8 @@
 Product 1──* SetupItem *──1 Setup
 ```
 
-- **Product**: `id`, `slug` (único), `name`, `category`, `styles[]`, `uses[]`,
+- **Product**: `id`, `slug` (único), `name`, `category`, `slot` (afinidad 1:1
+  con un slot de setup, base de substitutes), `styles[]`, `uses[]`,
   `priceCents` (entero, sin floats), `imageUrl?`, `createdAt`.
 - **Setup**: `id`, `slug` (único), `name`, `use`, `style`, `createdAt`.
 - **SetupItem**: `setupId + slot` (único: un producto por slot), `productId`.
@@ -43,4 +44,6 @@ Productos.
 ## Migración inicial
 
 `20260906172734_init_catalog_setups` creada y aplicada contra PostgreSQL 16.
-Las migraciones se versionan en Git (`prisma/migrations/`).
+`20260907184631_add_product_slot` añade `Product.slot` requerido con backfill
+por slug (nullable → UPDATE → NOT NULL). Las migraciones se versionan en Git
+(`prisma/migrations/`).

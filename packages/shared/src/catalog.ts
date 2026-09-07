@@ -32,6 +32,8 @@ export interface ProductDTO {
   slug: string;
   name: string;
   category: Category;
+  /** Slot que ocupa el producto dentro de un setup (afinidad 1:1 MVP). */
+  slot: Slot;
   styles: Style[];
   uses: Use[];
   /** Precio en céntimos para evitar errores de coma flotante. */
