@@ -1,13 +1,47 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import { Container } from "./design-system";
+import { Catalog } from "./pages/Catalog";
+import { Home } from "./pages/Home";
+
+const queryClient = new QueryClient();
+
+function Header(): JSX.Element {
+  return (
+    <header className="border-b border-line">
+      <Container>
+        <nav className="flex items-center justify-between py-4">
+          <Link to="/" className="font-display text-lg font-bold">
+            DeskLab
+          </Link>
+          <div className="flex gap-6 text-sm">
+            <Link to="/" className="hover:underline">
+              Inicio
+            </Link>
+            <Link to="/catalogo" className="hover:underline">
+              Catálogo
+            </Link>
+          </div>
+        </nav>
+      </Container>
+    </header>
+  );
+}
+
 export default function App(): JSX.Element {
   return (
-    <main className="min-h-screen bg-neutral-50 text-neutral-900">
-      <div className="mx-auto max-w-2xl px-6 py-16">
-        <h1 className="text-3xl font-bold">DeskLab</h1>
-        <p className="mt-4 text-neutral-600">
-          Base del proyecto inicializada. Ecommerce de setups de escritorio
-          (fase 1: arquitectura, sin funcionalidades todavía).
-        </p>
-      </div>
-    </main>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <div className="min-h-screen bg-canvas text-ink">
+          <Header />
+          <main>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/catalogo" element={<Catalog />} />
+            </Routes>
+          </main>
+        </div>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
