@@ -304,6 +304,7 @@ async function main(): Promise<void> {
       where: { slug: p.slug },
       update: {
         name: p.name,
+        category: p.category,
         slot: p.slot,
         priceCents: p.priceCents,
         styles: { set: [...p.styles] },
@@ -321,6 +322,8 @@ async function main(): Promise<void> {
     });
   }
 
+  // Se mantienen los 2 setups base (the-calm-desk, night-shift).
+  // Su ampliación a los 6 setups de docs/product.md queda para Fase 6.
   const setups = [
     {
       slug: "the-calm-desk",

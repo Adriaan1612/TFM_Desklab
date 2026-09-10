@@ -82,6 +82,10 @@ describe("Catalog states", () => {
     );
     renderCatalog();
     expect(await screen.findByText("Teclado mecánico 75%")).toBeInTheDocument();
+    expect(screen.getByText("Teclado mecánico 75%")).toHaveAttribute(
+      "href",
+      "/producto/teclado-mecanico-75",
+    );
     expect(screen.getByText("Mostrando 1–2 de 2")).toBeInTheDocument();
   });
 });

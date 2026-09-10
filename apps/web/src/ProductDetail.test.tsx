@@ -17,13 +17,20 @@ const product = {
   imageUrl: null,
 };
 
-function renderDetail(): void {
+function renderDetail(state?: { catalogSearch?: string }): void {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={["/producto/teclado-mecanico-75"]}>
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/producto/teclado-mecanico-75",
+            state: state ?? null,
+          },
+        ]}
+      >
         <Routes>
           <Route path="/producto/:slug" element={<ProductDetail />} />
         </Routes>
@@ -96,5 +103,99 @@ describe("ProductDetail", () => {
     expect(
       await screen.findByText("Este producto no existe."),
     ).toBeInTheDocument();
+  });
+
+  it("shows setups error state", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (url.endsWith("/setups")) {
+          return Promise.reject(new Error("down"));
+        }
+        if (url.endsWith("/substitutes")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ data: [] }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(product),
+        });
+      }),
+    );
+    renderDetail();
+    expect(
+      await screen.findByText("No hemos podido cargar los setups de este producto."),
+    ).toBeInTheDocument();
+  });
+
+  it("shows substitutes error state", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (url.endsWith("/substitutes")) {
+          return Promise.reject(new Error("down"));
+        }
+        if (url.endsWith("/setups")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ data: [] }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(product),
+        });
+      }),
+    );
+    renderDetail();
+    expect(
+      await screen.findByText(
+        "No hemos podido cargar las alternativas de este producto.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("shows substitute price and setup items with total", async () => {
+    const setup = {
+      id: "s1",
+      slug: "night-shift",
+      name: "Night Shift",
+      use: "Gaming",
+      style: "Dark",
+      items: [
+        { slot: "Keyboard", product },
+        { ...product, id: "3", slug: "raton-inalambrico", name: "Ratón inalámbrico", priceCents: 5900 },
+      ],
+      totalCents: 18800,
+    };
+    const alt = {
+      ...product,
+      id: "2",
+      slug: "teclado-rgb-tkl",
+      name: "Teclado RGB TKL",
+      priceCents: 8900,
+    };
+    mockApi([setup], [alt]);
+    renderDetail();
+    expect(await screen.findByText("Night Shift")).toBeInTheDocument();
+    expect(screen.getByText(/2 productos/)).toBeInTheDocument();
+    expect(screen.getByText("188,00 €")).toBeInTheDocument();
+    expect(screen.getByText("89,00 €")).toBeInTheDocument();
+  });
+
+  it("preserves catalog query params on back links", async () => {
+    mockApi([], []);
+    renderDetail({ catalogSearch: "?category=Lighting&page=2" });
+    expect(await screen.findByText("Teclado mecánico 75%")).toBeInTheDocument();
+    expect(screen.getByText("← Volver al catálogo")).toHaveAttribute(
+      "href",
+      "/catalogo?category=Lighting&page=2",
+    );
+    expect(screen.getByText("Seguir explorando")).toHaveAttribute(
+      "href",
+      "/catalogo?category=Lighting&page=2",
+    );
   });
 });

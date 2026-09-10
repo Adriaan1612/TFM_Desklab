@@ -140,8 +140,19 @@ describe("GET /products/:slug/setups", () => {
       url: "/products/teclado-mecanico-75/setups",
     });
     expect(res.statusCode).toBe(200);
-    const slugs = res.json().data.map((s: { slug: string }) => s.slug);
+    const body = res.json();
+    const slugs = body.data.map((s: { slug: string }) => s.slug);
     expect(slugs).toEqual(["night-shift", "the-calm-desk"]);
+    for (const setup of body.data) {
+      expect(setup.items.length).toBeGreaterThan(0);
+      expect(setup.totalCents).toBe(
+        setup.items.reduce(
+          (sum: number, item: { product: { priceCents: number } }) =>
+            sum + item.product.priceCents,
+          0,
+        ),
+      );
+    }
   });
 
   it("returns 404 for unknown slug", async () => {
@@ -161,6 +172,7 @@ describe("GET /products/:slug/substitutes", () => {
     });
     expect(res.statusCode).toBe(200);
     const body = res.json();
+    expect(body.data).toHaveLength(4);
     expect(
       body.data.every(
         (p: { slot: string; slug: string }) =>

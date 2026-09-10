@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import {
   ApiError,
   fetchProduct,
@@ -16,6 +16,11 @@ import {
 
 export function ProductDetail(): JSX.Element {
   const { slug = "" } = useParams();
+  const location = useLocation();
+  const catalogSearch =
+    (location.state as { catalogSearch?: string } | null)?.catalogSearch ??
+    "";
+  const backTo = `/catalogo${catalogSearch}`;
 
   const product = useQuery({
     queryKey: ["product", slug],
@@ -34,7 +39,7 @@ export function ProductDetail(): JSX.Element {
   return (
     <Container>
       <section className="py-12">
-        <Link to="/catalogo" className="text-sm hover:underline">
+        <Link to={backTo} className="text-sm hover:underline">
           ← Volver al catálogo
         </Link>
 
@@ -86,6 +91,11 @@ export function ProductDetail(): JSX.Element {
                 Aparece en
               </h2>
               {setups.isPending && <p className="mt-4">Cargando setups…</p>}
+              {setups.isError && (
+                <p className="mt-4" role="alert">
+                  No hemos podido cargar los setups de este producto.
+                </p>
+              )}
               {setups.data && setups.data.data.length === 0 && (
                 <p className="mt-4 text-ink/60">
                   Este producto aún no forma parte de ningún setup.
@@ -115,6 +125,11 @@ export function ProductDetail(): JSX.Element {
               {substitutes.isPending && (
                 <p className="mt-4">Cargando alternativas…</p>
               )}
+              {substitutes.isError && (
+                <p className="mt-4" role="alert">
+                  No hemos podido cargar las alternativas de este producto.
+                </p>
+              )}
               {substitutes.data && substitutes.data.data.length === 0 && (
                 <p className="mt-4 text-ink/60">
                   Sin alternativas en este slot por ahora.
@@ -142,7 +157,7 @@ export function ProductDetail(): JSX.Element {
             </div>
 
             <div className="mt-12">
-              <Button to="/catalogo" variant="secondary">
+              <Button to={backTo} variant="secondary">
                 Seguir explorando
               </Button>
             </div>
