@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -19,6 +19,7 @@ function renderCatalog(): void {
 }
 
 afterEach(() => {
+  cleanup();
   vi.unstubAllGlobals();
 });
 
@@ -81,6 +82,10 @@ describe("Catalog states", () => {
     );
     renderCatalog();
     expect(await screen.findByText("Teclado mecánico 75%")).toBeInTheDocument();
+    expect(screen.getByText("Teclado mecánico 75%")).toHaveAttribute(
+      "href",
+      "/producto/teclado-mecanico-75",
+    );
     expect(screen.getByText("Mostrando 1–2 de 2")).toBeInTheDocument();
   });
 });

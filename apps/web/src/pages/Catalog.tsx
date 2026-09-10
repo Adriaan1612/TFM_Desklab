@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { fetchProducts } from "../api/client";
 import {
   Badge,
@@ -159,6 +159,7 @@ function Pagination({
 
 export function Catalog(): JSX.Element {
   const [params] = useSearchParams();
+  const location = useLocation();
   const query = params.toString();
 
   const products = useQuery({
@@ -206,7 +207,13 @@ export function Catalog(): JSX.Element {
                       ))}
                     </div>
                     <h2 className="mt-4 font-display text-lg font-semibold">
-                      {product.name}
+                      <Link
+                        to={`/producto/${product.slug}`}
+                        state={{ catalogSearch: location.search }}
+                        className="hover:underline"
+                      >
+                        {product.name}
+                      </Link>
                     </h2>
                     <p className="mt-2 font-medium">
                       <Price cents={product.priceCents} />
