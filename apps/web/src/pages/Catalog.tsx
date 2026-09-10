@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { fetchProducts } from "../api/client";
 import {
   Badge,
@@ -206,7 +206,12 @@ export function Catalog(): JSX.Element {
                       ))}
                     </div>
                     <h2 className="mt-4 font-display text-lg font-semibold">
-                      {product.name}
+                      <Link
+                        to={`/producto/${product.slug}`}
+                        className="hover:underline"
+                      >
+                        {product.name}
+                      </Link>
                     </h2>
                     <p className="mt-2 font-medium">
                       <Price cents={product.priceCents} />

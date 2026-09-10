@@ -3,6 +3,7 @@ import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import { Container } from "./design-system";
 import { Catalog } from "./pages/Catalog";
 import { Home } from "./pages/Home";
+import { ProductDetail } from "./pages/ProductDetail";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ export default function App(): JSX.Element {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/catalogo" element={<Catalog />} />
+              <Route path="/producto/:slug" element={<ProductDetail />} />
             </Routes>
           </main>
         </div>

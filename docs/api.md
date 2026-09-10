@@ -20,6 +20,16 @@ GET /products?style=Dark&use=Gaming&page=1&pageSize=20
 
 Un producto o 404.
 
+## GET /products/:slug/setups
+
+Setups donde aparece el producto (`{ data: SetupDTO[] }`, 404 si no existe).
+Base de la sección "Aparece en" del detalle.
+
+## GET /products/:slug/substitutes
+
+Productos del mismo slot sin el actual (`{ data: ProductDTO[] }`, 404 si no
+existe). Base de "Alternativas compatibles" del detalle.
+
 ## GET /setups
 
 Lista con filtros opcionales `use` y `style`. Cada setup incluye sus items

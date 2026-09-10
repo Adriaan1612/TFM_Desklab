@@ -12,10 +12,10 @@ describe("GET /products", () => {
     const res = await app.inject({ method: "GET", url: "/products" });
     expect(res.statusCode).toBe(200);
     const body = res.json();
-    expect(body.total).toBe(8);
+    expect(body.total).toBe(32);
     expect(body.page).toBe(1);
     expect(body.pageSize).toBe(20);
-    expect(body.data).toHaveLength(8);
+    expect(body.data).toHaveLength(20);
   });
 
   it("keeps total before pagination", async () => {
@@ -24,7 +24,7 @@ describe("GET /products", () => {
       url: "/products?page=2&pageSize=3",
     });
     const body = res.json();
-    expect(body.total).toBe(8);
+    expect(body.total).toBe(32);
     expect(body.page).toBe(2);
     expect(body.data).toHaveLength(3);
   });
@@ -35,8 +35,8 @@ describe("GET /products", () => {
       url: "/products?category=Lighting",
     });
     const body = res.json();
-    expect(body.total).toBe(1);
-    expect(body.data[0].slug).toBe("lampara-escritorio-calida");
+    expect(body.total).toBe(4);
+    expect(body.data[0].slug).toBe("barra-luz-monitor");
   });
 
   it("filters by style and use", async () => {
@@ -45,7 +45,7 @@ describe("GET /products", () => {
       url: "/products?style=Dark&use=Gaming",
     });
     const body = res.json();
-    expect(body.total).toBe(4);
+    expect(body.total).toBe(14);
   });
 
   it("filters by price range", async () => {
@@ -54,7 +54,7 @@ describe("GET /products", () => {
       url: "/products?minPriceCents=5000&maxPriceCents=10000",
     });
     const body = res.json();
-    expect(body.total).toBe(2);
+    expect(body.total).toBe(9);
   });
 
   it("rejects pageSize over 50", async () => {
@@ -133,6 +133,51 @@ describe("GET /setups", () => {
   });
 });
 
+describe("GET /products/:slug/setups", () => {
+  it("returns setups containing the product", async () => {
+    const res = await app.inject({
+      method: "GET",
+      url: "/products/teclado-mecanico-75/setups",
+    });
+    expect(res.statusCode).toBe(200);
+    const slugs = res.json().data.map((s: { slug: string }) => s.slug);
+    expect(slugs).toEqual(["night-shift", "the-calm-desk"]);
+  });
+
+  it("returns 404 for unknown slug", async () => {
+    const res = await app.inject({
+      method: "GET",
+      url: "/products/no-existe/setups",
+    });
+    expect(res.statusCode).toBe(404);
+  });
+});
+
+describe("GET /products/:slug/substitutes", () => {
+  it("returns same-slot products excluding itself", async () => {
+    const res = await app.inject({
+      method: "GET",
+      url: "/products/teclado-mecanico-75/substitutes",
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(
+      body.data.every(
+        (p: { slot: string; slug: string }) =>
+          p.slot === "Keyboard" && p.slug !== "teclado-mecanico-75",
+      ),
+    ).toBe(true);
+  });
+
+  it("returns 404 for unknown slug", async () => {
+    const res = await app.inject({
+      method: "GET",
+      url: "/products/no-existe/substitutes",
+    });
+    expect(res.statusCode).toBe(404);
+  });
+});
+
 describe("GET /setups/:slug/substitutes", () => {
   it("returns same-slot candidates excluding the current product", async () => {
     const res = await app.inject({
@@ -141,7 +186,12 @@ describe("GET /setups/:slug/substitutes", () => {
     });
     expect(res.statusCode).toBe(200);
     const body = res.json();
-    expect(body.data).toEqual([]);
+    expect(body.data.length).toBeGreaterThan(0);
+    expect(
+      body.data.every(
+        (p: { slug: string }) => p.slug !== "teclado-mecanico-75",
+      ),
+    ).toBe(true);
   });
 
   it("returns 404 for unknown setup", async () => {

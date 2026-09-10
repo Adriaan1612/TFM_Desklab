@@ -39,3 +39,17 @@ export function fetchProducts(query: string): Promise<ProductsResponse> {
 export function fetchSetups(): Promise<SetupsResponse> {
   return get<SetupsResponse>("/setups");
 }
+
+export function fetchProduct(slug: string): Promise<ProductDTO> {
+  return get<ProductDTO>(`/products/${slug}`);
+}
+
+export function fetchProductSetups(slug: string): Promise<SetupsResponse> {
+  return get<SetupsResponse>(`/products/${slug}/setups`);
+}
+
+export function fetchProductSubstitutes(
+  slug: string,
+): Promise<{ data: ProductDTO[] }> {
+  return get<{ data: ProductDTO[] }>(`/products/${slug}/substitutes`);
+}
