@@ -27,7 +27,7 @@ export function Home(): JSX.Element {
         </p>
         <div className="mt-8 flex gap-3">
           <Button to="/catalogo">Explorar catálogo</Button>
-          <Button to="/catalogo" variant="secondary">
+          <Button to="/setups" variant="secondary">
             Ver setups
           </Button>
         </div>

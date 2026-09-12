@@ -101,6 +101,19 @@ describe("SetupDetail", () => {
     expect(await screen.findByText("Este setup no existe.")).toBeInTheDocument();
   });
 
+  it("shows generic error when loading fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.resolve({ ok: false, status: 500 })),
+    );
+    renderDetail();
+    expect(
+      await screen.findByText(
+        "No hemos podido cargar el setup. Inténtalo de nuevo más tarde.",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("shows slots with live total and disabled cart", async () => {
     mockSetupApi();
     renderDetail();

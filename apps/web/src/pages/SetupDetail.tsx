@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
-import { setupTotal, type ProductDTO, type Slot } from "@desklab/shared";
+import { setupTotal, swapItem, type ProductDTO, type Slot } from "@desklab/shared";
 import {
   ApiError,
   fetchSetup,
@@ -128,6 +128,8 @@ export function SetupDetail(): JSX.Element {
   const customizedCount = Object.keys(overrides).length;
 
   function handleSwap(slot: Slot, product: ProductDTO): void {
+    // Valida que el producto pertenezca al slot antes de aplicarlo.
+    swapItem(items, slot, product);
     setOverrides((prev) => ({ ...prev, [slot]: product }));
   }
 
