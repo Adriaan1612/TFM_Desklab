@@ -4,6 +4,8 @@ import { Container } from "./design-system";
 import { Catalog } from "./pages/Catalog";
 import { Home } from "./pages/Home";
 import { ProductDetail } from "./pages/ProductDetail";
+import { SetupDetail } from "./pages/SetupDetail";
+import { Setups } from "./pages/Setups";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ export default function App(): JSX.Element {
               <Route path="/" element={<Home />} />
               <Route path="/catalogo" element={<Catalog />} />
               <Route path="/producto/:slug" element={<ProductDetail />} />
+              <Route path="/setup/:slug" element={<SetupDetail />} />
+              <Route path="/setups" element={<Setups />} />
             </Routes>
           </main>
         </div>

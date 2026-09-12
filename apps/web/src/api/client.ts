@@ -53,3 +53,16 @@ export function fetchProductSubstitutes(
 ): Promise<{ data: ProductDTO[] }> {
   return get<{ data: ProductDTO[] }>(`/products/${slug}/substitutes`);
 }
+
+export function fetchSetup(slug: string): Promise<SetupDTO> {
+  return get<SetupDTO>(`/setups/${slug}`);
+}
+
+export function fetchSetupSubstitutes(
+  slug: string,
+  slot: string,
+): Promise<{ data: ProductDTO[] }> {
+  return get<{ data: ProductDTO[] }>(
+    `/setups/${slug}/substitutes?slot=${slot}`,
+  );
+}

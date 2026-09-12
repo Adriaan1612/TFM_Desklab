@@ -1,5 +1,33 @@
 import { describe, expect, it } from "vitest";
-import { hasUniqueSlots, setupTotal } from "./catalog.js";
+import {
+  hasUniqueSlots,
+  setupTotal,
+  swapItem,
+  type ProductDTO,
+  type SetupItemDTO,
+} from "./catalog.js";
+
+function product(overrides: Partial<ProductDTO> = {}): ProductDTO {
+  return {
+    id: "p1",
+    slug: "teclado-mecanico-75",
+    name: "Teclado mecánico 75%",
+    category: "Peripherals",
+    slot: "Keyboard",
+    styles: ["Minimal"],
+    uses: ["Work"],
+    priceCents: 12900,
+    imageUrl: null,
+    ...overrides,
+  };
+}
+
+function items(): SetupItemDTO[] {
+  return [
+    { slot: "Monitor", product: product({ id: "m", slug: "monitor-27-4k", slot: "Monitor", priceCents: 34900 }) },
+    { slot: "Keyboard", product: product() },
+  ];
+}
 
 describe("setupTotal", () => {
   it("sums item prices", () => {
@@ -27,5 +55,32 @@ describe("hasUniqueSlots", () => {
     expect(
       hasUniqueSlots([{ slot: "Monitor" }, { slot: "Monitor" }]),
     ).toBe(false);
+  });
+});
+
+describe("swapItem", () => {
+  it("replaces the product of the slot", () => {
+    const next = product({ id: "p2", slug: "teclado-rgb-tkl", priceCents: 8900 });
+    const result = swapItem(items(), "Keyboard", next);
+    expect(result.find((i) => i.slot === "Keyboard")?.product.slug).toBe(
+      "teclado-rgb-tkl",
+    );
+    expect(result.find((i) => i.slot === "Monitor")?.product.slug).toBe(
+      "monitor-27-4k",
+    );
+  });
+
+  it("does not mutate the original items", () => {
+    const before = items();
+    swapItem(before, "Keyboard", product({ id: "p2", slug: "x" }));
+    expect(before.find((i) => i.slot === "Keyboard")?.product.slug).toBe(
+      "teclado-mecanico-75",
+    );
+  });
+
+  it("rejects a product from another slot", () => {
+    expect(() =>
+      swapItem(items(), "Keyboard", product({ slot: "Mouse", slug: "raton-x" })),
+    ).toThrow(/does not belong to slot 'Keyboard'/);
   });
 });
