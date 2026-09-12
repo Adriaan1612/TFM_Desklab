@@ -122,5 +122,13 @@ describe("Checkout", () => {
     expect(
       await screen.findByText("Revisa los datos del formulario."),
     ).toBeInTheDocument();
+    // El carrito no se vacía tras un error: la línea sigue en localStorage.
+    const stored = JSON.parse(
+      localStorage.getItem("desklab-cart") ?? "[]",
+    ) as Array<{ product: { slug: string }; quantity: number }>;
+    expect(stored).toHaveLength(1);
+    expect(stored[0].product.slug).toBe("teclado-mecanico-75");
+    expect(stored[0].quantity).toBe(1);
+    expect(screen.getByText(/Teclado mecánico 75%/)).toBeInTheDocument();
   });
 });
