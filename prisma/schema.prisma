@@ -59,6 +59,7 @@ model Product {
   imageUrl   String?
   createdAt  DateTime   @default(now())
   setupItems SetupItem[]
+  orderItems OrderItem[]
 
   @@index([category])
   @@index([slot])
@@ -88,4 +89,34 @@ model SetupItem {
 
   @@unique([setupId, slot])
   @@index([productId])
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber Int         @unique @default(autoincrement())
+  email       String
+  name        String
+  address     String
+  city        String
+  postalCode  String
+  totalCents  Int
+  createdAt   DateTime    @default(now())
+  items       OrderItem[]
+
+  @@index([email])
+}
+
+model OrderItem {
+  id         String  @id @default(cuid())
+  orderId    String
+  productId  String
+  name       String
+  priceCents Int
+  quantity   Int
+  setupSlug  String?
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
 }

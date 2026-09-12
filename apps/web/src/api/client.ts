@@ -1,4 +1,4 @@
-import type { ProductDTO, SetupDTO } from "@desklab/shared";
+import type { OrderDTO, ProductDTO, SetupDTO } from "@desklab/shared";
 
 const BASE_URL =
   import.meta.env?.VITE_API_URL ?? "http://localhost:3001";
@@ -65,4 +65,25 @@ export function fetchSetupSubstitutes(
   return get<{ data: ProductDTO[] }>(
     `/setups/${slug}/substitutes?slot=${slot}`,
   );
+}
+
+export interface CheckoutInput {
+  email: string;
+  name: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  items: Array<{ productId: string; quantity: number; setupSlug?: string }>;
+}
+
+export async function placeOrder(input: CheckoutInput): Promise<OrderDTO> {
+  const res = await fetch(`${BASE_URL}/checkout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    throw new ApiError(res.status, `POST /checkout failed (${res.status})`);
+  }
+  return (await res.json()) as OrderDTO;
 }

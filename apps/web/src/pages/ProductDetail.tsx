@@ -6,6 +6,7 @@ import {
   fetchProductSetups,
   fetchProductSubstitutes,
 } from "../api/client";
+import { useCart } from "../cart/CartContext";
 import {
   Badge,
   Button,
@@ -17,6 +18,7 @@ import {
 export function ProductDetail(): JSX.Element {
   const { slug = "" } = useParams();
   const location = useLocation();
+  const { add } = useCart();
   const catalogSearch =
     (location.state as { catalogSearch?: string } | null)?.catalogSearch ??
     "";
@@ -83,6 +85,11 @@ export function ProductDetail(): JSX.Element {
                 <p className="mt-2 text-sm text-ink/60">
                   Precio con IVA incluido.
                 </p>
+                <div className="mt-6">
+                  <Button onClick={() => add(product.data)}>
+                    Añadir al carrito
+                  </Button>
+                </div>
               </div>
             </div>
 

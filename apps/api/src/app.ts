@@ -3,6 +3,7 @@ import cors from "@fastify/cors";
 import { db } from "./db.js";
 import { productRoutes } from "./routes/products.js";
 import { productRelationsRoutes } from "./routes/product-relations.js";
+import { checkoutRoutes } from "./routes/checkout.js";
 import { setupRoutes } from "./routes/setups.js";
 import { substituteRoutes } from "./routes/substitutes.js";
 
@@ -19,6 +20,7 @@ export function buildApp(): FastifyInstance {
 
   void app.register(productRoutes);
   void app.register(productRelationsRoutes);
+  void app.register(checkoutRoutes);
   void app.register(setupRoutes);
   void app.register(substituteRoutes);
 

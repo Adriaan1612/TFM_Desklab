@@ -7,6 +7,7 @@ import {
   fetchSetup,
   fetchSetupSubstitutes,
 } from "../api/client";
+import { useCart } from "../cart/CartContext";
 import {
   Badge,
   Button,
@@ -108,6 +109,7 @@ function SlotRow({
 
 export function SetupDetail(): JSX.Element {
   const { slug = "" } = useParams();
+  const { add } = useCart();
   // Personalización solo en memoria: se pierde al salir de la página.
   const [overrides, setOverrides] = useState<Partial<Record<Slot, ProductDTO>>>(
     {},
@@ -192,8 +194,14 @@ export function SetupDetail(): JSX.Element {
             </div>
 
             <div className="mt-12 flex gap-3">
-              <Button disabled title="Disponible próximamente">
-                Añadir al carrito (próximamente)
+              <Button
+                onClick={() => {
+                  for (const item of items) {
+                    add(item.product, setup.data.slug);
+                  }
+                }}
+              >
+                Añadir setup al carrito
               </Button>
               <Button to="/" variant="secondary">
                 Seguir explorando
