@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { CartProvider } from "./cart/CartContext";
 import { SetupDetail } from "./pages/SetupDetail";
 
 const monitor = {
@@ -54,9 +55,11 @@ function renderDetail(): void {
   render(
     <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={["/setup/night-shift"]}>
-        <Routes>
-          <Route path="/setup/:slug" element={<SetupDetail />} />
-        </Routes>
+        <CartProvider>
+          <Routes>
+            <Route path="/setup/:slug" element={<SetupDetail />} />
+          </Routes>
+        </CartProvider>
       </MemoryRouter>
     </QueryClientProvider>,
   );
@@ -114,14 +117,20 @@ describe("SetupDetail", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows slots with live total and disabled cart", async () => {
+  it("shows slots with live total and adds setup lines to cart", async () => {
     mockSetupApi();
     renderDetail();
     expect(await screen.findByText("Night Shift")).toBeInTheDocument();
     expect(screen.getByText("Monitor 27 4K")).toBeInTheDocument();
     expect(screen.getByText("478,00 €")).toBeInTheDocument();
-    const cart = screen.getByText("Añadir al carrito (próximamente)");
-    expect(cart).toBeDisabled();
+    fireEvent.click(screen.getByText("Añadir setup al carrito"));
+    const stored = JSON.parse(
+      localStorage.getItem("desklab-cart") ?? "[]",
+    ) as Array<{ product: { slug: string }; setupSlug?: string }>;
+    expect(stored).toHaveLength(2);
+    expect(
+      stored.every((l) => l.setupSlug === "night-shift"),
+    ).toBe(true);
   });
 
   it("swapping a slot updates the total", async () => {

@@ -3,6 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { CartProvider } from "./cart/CartContext";
 import { ProductDetail } from "./pages/ProductDetail";
 
 const product = {
@@ -31,9 +32,11 @@ function renderDetail(state?: { catalogSearch?: string }): void {
           },
         ]}
       >
-        <Routes>
-          <Route path="/producto/:slug" element={<ProductDetail />} />
-        </Routes>
+        <CartProvider>
+          <Routes>
+            <Route path="/producto/:slug" element={<ProductDetail />} />
+          </Routes>
+        </CartProvider>
       </MemoryRouter>
     </QueryClientProvider>,
   );

@@ -32,8 +32,10 @@ Product 1──* SetupItem *──1 Setup
 
 ## Fuera de esta fase (estricto)
 
-`User`, `Cart`, `Order`, `SavedSetup` y persistencia del cuestionario IA.
-Llegan en sus fases (carrito/checkout, cuenta, IA).
+`User`, `Cart`, `SavedSetup` y persistencia del cuestionario IA.
+El carrito vive en el frontend; los pedidos de invitado (`Order`,
+`OrderItem` con snapshot de nombre/precio y `setupSlug?`) llegan en
+la fase de carrito/checkout.
 
 ## Seed mínimo
 

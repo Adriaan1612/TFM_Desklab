@@ -45,6 +45,24 @@ export const SubstitutesQuerySchema = z.object({
   slot: SlotSchema,
 });
 
+export const CheckoutSchema = z.object({
+  email: z.email(),
+  name: z.string().trim().min(1).max(120),
+  address: z.string().trim().min(1).max(200),
+  city: z.string().trim().min(1).max(120),
+  postalCode: z.string().trim().min(1).max(20),
+  items: z
+    .array(
+      z.object({
+        productId: z.string().min(1),
+        quantity: z.number().int().min(1).max(99),
+        setupSlug: z.string().min(1).max(120).optional(),
+      }),
+    )
+    .min(1)
+    .max(100),
+});
+
 export function zodMessage(error: z.ZodError): string {
   return error.issues
     .map((issue) => {

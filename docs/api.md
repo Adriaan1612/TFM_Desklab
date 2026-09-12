@@ -48,6 +48,20 @@ Regla MVP sin compatibilidad avanzada.
 
 ## Fuera de esta fase
 
-Carrito/checkout, cuentas y auth, IA. Sin cambios de modelo salvo
+Cuentas y auth, IA. Sin cambios de modelo salvo
 `Product.slot` (requerido por substitutes, migración
 `20260907184631_add_product_slot`).
+
+## POST /checkout (Fase 7)
+
+Alta de pedido simulado para invitado. El cliente envía solo
+identificadores y cantidades; precios y total se calculan en servidor.
+`email` válido, `name`/`address`/`city`/`postalCode` y `items`
+(`productId`, `quantity` 1–99, `setupSlug?`) requeridos. 404 si un producto
+no existe. Responde `201` con la Order (`orderNumber` autoincremental,
+`totalCents`, items con snapshot de nombre y precio).
+
+## GET /orders/:id (Fase 7)
+
+Devuelve un pedido (simplificación de invitado hasta la fase de cuenta)
+o 404.
