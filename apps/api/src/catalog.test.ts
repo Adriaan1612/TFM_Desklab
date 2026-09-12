@@ -115,7 +115,7 @@ describe("GET /setups", () => {
     const res = await app.inject({ method: "GET", url: "/setups" });
     expect(res.statusCode).toBe(200);
     const body = res.json();
-    expect(body.data).toHaveLength(2);
+    expect(body.data).toHaveLength(6);
     const calm = body.data.find((s: { slug: string }) => s.slug === "the-calm-desk");
     expect(calm.totalCents).toBe(62600);
     expect(calm.items).toHaveLength(6);
@@ -127,8 +127,11 @@ describe("GET /setups", () => {
       url: "/setups?use=Gaming",
     });
     const body = res.json();
-    expect(body.data).toHaveLength(1);
-    expect(body.data[0].slug).toBe("night-shift");
+    expect(body.data).toHaveLength(2);
+    expect(body.data.map((s: { slug: string }) => s.slug)).toEqual([
+      "night-shift",
+      "rgb-focus",
+    ]);
     expect(body.data[0].totalCents).toBe(66100);
   });
 });

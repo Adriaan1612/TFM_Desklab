@@ -52,7 +52,7 @@ export function Home(): JSX.Element {
                   <Badge label={setup.style} />
                 </div>
                 <h3 className="mt-4 font-display text-xl font-semibold">
-                  <Link to="/catalogo" className="hover:underline">
+                  <Link to={`/setup/${setup.slug}`} className="hover:underline">
                     {setup.name}
                   </Link>
                 </h3>

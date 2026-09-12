@@ -75,3 +75,23 @@ export function hasUniqueSlots(
   const seen = new Set(items.map((item) => item.slot));
   return seen.size === items.length;
 }
+
+/**
+ * Reemplaza el producto de un slot (inmutable). Valida que el producto
+ * pertenezca al mismo slot (regla MVP). El total se recalcula aparte con
+ * `setupTotal`; la personalización vive solo en memoria (sin persistencia).
+ */
+export function swapItem(
+  items: ReadonlyArray<SetupItemDTO>,
+  slot: Slot,
+  product: ProductDTO,
+): SetupItemDTO[] {
+  if (product.slot !== slot) {
+    throw new Error(
+      `product '${product.slug}' does not belong to slot '${slot}'`,
+    );
+  }
+  return items.map((item) =>
+    item.slot === slot ? { slot, product } : item,
+  );
+}
