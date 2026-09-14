@@ -1,6 +1,8 @@
 import Fastify, { type FastifyInstance } from "fastify";
+import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import { db } from "./db.js";
+import { authRoutes } from "./routes/auth.js";
 import { productRoutes } from "./routes/products.js";
 import { productRelationsRoutes } from "./routes/product-relations.js";
 import { checkoutRoutes } from "./routes/checkout.js";
@@ -10,8 +12,10 @@ import { substituteRoutes } from "./routes/substitutes.js";
 export function buildApp(): FastifyInstance {
   const app = Fastify({ logger: true });
 
+  void app.register(cookie);
   void app.register(cors, {
     origin: process.env.WEB_URL ?? "http://localhost:5173",
+    credentials: true,
   });
 
   app.get("/health", async () => {
@@ -19,6 +23,7 @@ export function buildApp(): FastifyInstance {
   });
 
   void app.register(productRoutes);
+  void app.register(authRoutes);
   void app.register(productRelationsRoutes);
   void app.register(checkoutRoutes);
   void app.register(setupRoutes);

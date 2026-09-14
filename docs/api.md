@@ -65,3 +65,23 @@ no existe. Responde `201` con la Order (`orderNumber` autoincremental,
 
 Devuelve un pedido (simplificación de invitado hasta la fase de cuenta)
 o 404.
+
+## Auth por cookie de sesión (Fase 8)
+
+Sesión en `Session` con cookie `desklab_session` HttpOnly (`SameSite=Lax`,
+30 días; `Secure` solo con `COOKIE_SECURE=true` en producción).
+Sin token en `localStorage`: el frontend consulta `GET /auth/me`.
+
+- `POST /auth/register` (`email`, `name`, `password` ≥ 8; 409 si existe) →
+  201 + cookie.
+- `POST /auth/login` (401 si credenciales mal) → cookie.
+- `POST /auth/logout` → revoca la sesión y limpia la cookie.
+- `GET /auth/me` → usuario o 401.
+- Contraseñas con scrypt de Node. Sin reset ni rate-limit (no-objetivos TFM).
+
+## GET /orders (Fase 8)
+
+Pedidos del usuario de la sesión (401 sin sesión). `POST /checkout`
+vincula `userId` solo si hay sesión (sin backfill de invitados);
+`GET /orders/:id` exige propiedad cuando el pedido tiene dueño
+(los de invitado siguen por id).

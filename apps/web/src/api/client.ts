@@ -24,7 +24,7 @@ export class ApiError extends Error {
 }
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`);
+  const res = await fetch(`${BASE_URL}${path}`, { credentials: "include" });
   if (!res.ok) {
     throw new ApiError(res.status, `GET ${path} failed (${res.status})`);
   }
@@ -67,6 +67,62 @@ export function fetchSetupSubstitutes(
   );
 }
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+}
+
+export async function fetchMe(): Promise<AuthUser> {
+  const res = await fetch(`${BASE_URL}/auth/me`, { credentials: "include" });
+  if (!res.ok) {
+    throw new ApiError(res.status, `GET /auth/me failed (${res.status})`);
+  }
+  return ((await res.json()) as { user: AuthUser }).user;
+}
+
+export async function register(
+  name: string,
+  email: string,
+  password: string,
+): Promise<AuthUser> {
+  return postAuth("/auth/register", { name, email, password });
+}
+
+export async function login(email: string, password: string): Promise<AuthUser> {
+  return postAuth("/auth/login", { email, password });
+}
+
+async function postAuth(path: string, body: unknown): Promise<AuthUser> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    throw new ApiError(res.status, `POST ${path} failed (${res.status})`);
+  }
+  return ((await res.json()) as { user: AuthUser }).user;
+}
+
+export async function logout(): Promise<void> {
+  await fetch(`${BASE_URL}/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: "{}",
+  });
+}
+
+export async function fetchMyOrders(): Promise<{ data: OrderDTO[] }> {
+  const res = await fetch(`${BASE_URL}/orders`, { credentials: "include" });
+  if (!res.ok) {
+    throw new ApiError(res.status, `GET /orders failed (${res.status})`);
+  }
+  return (await res.json()) as { data: OrderDTO[] };
+}
+
 export interface CheckoutInput {
   email: string;
   name: string;
@@ -79,6 +135,7 @@ export interface CheckoutInput {
 export async function placeOrder(input: CheckoutInput): Promise<OrderDTO> {
   const res = await fetch(`${BASE_URL}/checkout`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
