@@ -19,7 +19,7 @@ async function register(email: string): Promise<string> {
   const res = await app.inject({
     method: "POST",
     url: "/auth/register",
-    payload: { email: unique, name: "Test User", password: "password123" },
+    payload: { email: unique, name: "Test User", password: "Password123" },
   });
   expect(res.statusCode).toBe(201);
   return cookieOf(res);
@@ -56,13 +56,13 @@ describe("auth", () => {
     const first = await app.inject({
       method: "POST",
       url: "/auth/register",
-      payload: { email: dupEmail, name: "X", password: "password123" },
+      payload: { email: dupEmail, name: "X", password: "Password123" },
     });
     expect(first.statusCode).toBe(201);
     const dup = await app.inject({
       method: "POST",
       url: "/auth/register",
-      payload: { email: dupEmail, name: "X", password: "password123" },
+      payload: { email: dupEmail, name: "X", password: "Password123" },
     });
     expect(dup.statusCode).toBe(409);
     const short = await app.inject({
@@ -83,6 +83,34 @@ describe("auth", () => {
       payload: { email: "nadie@desklab.es", password: "password123" },
     });
     expect(unknown.statusCode).toBe(401);
+  });
+
+  it("rejects passwords missing complexity", async () => {
+    const base = { name: "X", password: "password123" };
+    const cases: Array<[string, string]> = [
+      ["no-upper@desklab.es", "password123"],
+      ["no-lower@desklab.es", "PASSWORD123"],
+      ["no-digit@desklab.es", "PasswordABC"],
+      ["too-short@desklab.es", "Ab1"],
+    ];
+    for (const [email, password] of cases) {
+      const res = await app.inject({
+        method: "POST",
+        url: "/auth/register",
+        payload: { ...base, email: `${Date.now()}-${email}`, password },
+      });
+      expect(res.statusCode).toBe(400);
+    }
+    const ok = await app.inject({
+      method: "POST",
+      url: "/auth/register",
+      payload: {
+        ...base,
+        email: `${Date.now()}-ok-complex@desklab.es`,
+        password: "Abcdefg1",
+      },
+    });
+    expect(ok.statusCode).toBe(201);
   });
 
   it("rejects me without session and expired sessions", async () => {

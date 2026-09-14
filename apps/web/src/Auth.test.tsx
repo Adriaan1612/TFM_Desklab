@@ -143,4 +143,22 @@ describe("auth pages", () => {
     expect(await screen.findByText("Pedido #7")).toBeInTheDocument();
     expect(screen.getByText("Ratón inalámbrico × 2")).toBeInTheDocument();
   });
+
+  it("updates password requirements while typing", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.resolve({ ok: false, status: 401 })),
+    );
+    renderAt("/registro");
+    const input = screen.getByLabelText("Contraseña");
+    fireEvent.change(input, { target: { value: "abc" } });
+    expect(screen.getByText("× Mínimo 8 caracteres")).toBeInTheDocument();
+    expect(screen.getByText("✓ Al menos una minúscula")).toBeInTheDocument();
+    expect(screen.getByText("× Al menos una mayúscula")).toBeInTheDocument();
+    expect(screen.getByText("× Al menos un número")).toBeInTheDocument();
+    fireEvent.change(input, { target: { value: "Abcdefg1" } });
+    expect(screen.getByText("✓ Mínimo 8 caracteres")).toBeInTheDocument();
+    expect(screen.getByText("✓ Al menos una mayúscula")).toBeInTheDocument();
+    expect(screen.getByText("✓ Al menos un número")).toBeInTheDocument();
+  });
 });

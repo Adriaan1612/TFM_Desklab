@@ -7,6 +7,14 @@ import { Button, Container } from "../design-system";
 const inputCls =
   "w-full rounded-xl border border-line bg-white px-4 py-2.5 text-sm text-ink";
 
+// Mismas reglas que RegisterSchema en el backend (sin símbolo especial).
+const PASSWORD_RULES = [
+  { id: "length", label: "Mínimo 8 caracteres", ok: (v: string) => v.length >= 8 },
+  { id: "lower", label: "Al menos una minúscula", ok: (v: string) => /[a-z]/.test(v) },
+  { id: "upper", label: "Al menos una mayúscula", ok: (v: string) => /[A-Z]/.test(v) },
+  { id: "digit", label: "Al menos un número", ok: (v: string) => /\d/.test(v) },
+];
+
 export function Registro(): JSX.Element {
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -61,17 +69,31 @@ export function Registro(): JSX.Element {
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
-            Contraseña (mínimo 8 caracteres)
+            Contraseña
             <input
               aria-label="Contraseña"
               type="password"
               minLength={8}
+              maxLength={200}
               className={inputCls}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </label>
+          <ul aria-label="Requisitos de contraseña" className="flex flex-col gap-1 text-sm">
+            {PASSWORD_RULES.map((rule) => {
+              const met = rule.ok(password);
+              return (
+                <li
+                  key={rule.id}
+                  className={met ? "text-moss-dark" : "text-red-700"}
+                >
+                  {met ? "✓" : "×"} {rule.label}
+                </li>
+              );
+            })}
+          </ul>
           {error && <p role="alert">{error}</p>}
           <Button type="submit" disabled={sending}>
             {sending ? "Creando…" : "Crear cuenta"}
