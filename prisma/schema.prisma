@@ -94,6 +94,7 @@ model SetupItem {
 model Order {
   id          String      @id @default(cuid())
   orderNumber Int         @unique @default(autoincrement())
+  userId      String?
   email       String
   name        String
   address     String
@@ -103,7 +104,10 @@ model Order {
   createdAt   DateTime    @default(now())
   items       OrderItem[]
 
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   @@index([email])
+  @@index([userId])
 }
 
 model OrderItem {
@@ -119,4 +123,26 @@ model OrderItem {
   product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 
   @@index([orderId])
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  sessions     Session[]
+  orders       Order[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

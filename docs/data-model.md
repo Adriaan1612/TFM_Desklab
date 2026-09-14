@@ -32,10 +32,17 @@ Product 1──* SetupItem *──1 Setup
 
 ## Fuera de esta fase (estricto)
 
-`User`, `Cart`, `SavedSetup` y persistencia del cuestionario IA.
+`Cart`, `SavedSetup` y persistencia del cuestionario IA.
 El carrito vive en el frontend; los pedidos de invitado (`Order`,
 `OrderItem` con snapshot de nombre/precio y `setupSlug?`) llegan en
 la fase de carrito/checkout.
+
+## Cuenta (Fase 8)
+
+`User` (`email` único, `name`, `passwordHash` scrypt), `Session`
+(`token` único, `expiresAt` 30 días, cascade por usuario) y
+`Order.userId?` (solo pedidos hechos logueado, sin backfill).
+Migración `20260914174204_add_users_sessions`.
 
 ## Seed mínimo
 

@@ -63,6 +63,23 @@ export const CheckoutSchema = z.object({
     .max(100),
 });
 
+export const RegisterSchema = z.object({
+  email: z.email().max(160),
+  name: z.string().trim().min(1).max(120),
+  password: z
+    .string()
+    .min(8)
+    .max(200)
+    .regex(/[a-z]/, "password needs a lowercase letter")
+    .regex(/[A-Z]/, "password needs an uppercase letter")
+    .regex(/\d/, "password needs a number"),
+});
+
+export const LoginSchema = z.object({
+  email: z.email().max(160),
+  password: z.string().min(1).max(200),
+});
+
 export function zodMessage(error: z.ZodError): string {
   return error.issues
     .map((issue) => {
