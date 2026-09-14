@@ -31,7 +31,10 @@ export async function aiRoutes(app: FastifyInstance): Promise<void> {
       if (err instanceof RecommendationError) {
         return sendError(reply, 502, "AI_INVALID", err.message);
       }
-      throw err;
+      // Errores del proveedor (429, auth, red, etc.): nunca se propagan
+      // crudos al cliente (billing, API key, detalles internos).
+      req.log.warn({ err }, "AI provider failed");
+      return sendError(reply, 503, "AI_UNAVAILABLE", "AI service unavailable");
     }
   });
 }

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { fetchSetups } from "../api/client";
 import {
   Badge,
+  Button,
   Card,
   Container,
   Price,
@@ -16,11 +17,21 @@ export function Setups(): JSX.Element {
       <section className="py-12">
         <h1 className="font-display text-3xl font-bold">Setups</h1>
         <p className="mt-2 text-ink/60">
-          Espacios coherentes listos para personalizar.{" "}
-          <Link to="/crear-mi-setup" className="hover:underline">
-            ¿Prefieres que la IA monte el tuyo?
-          </Link>
+          Espacios coherentes listos para personalizar.
         </p>
+        <div className="mt-6 flex flex-wrap items-center gap-4 rounded-2xl border border-line bg-white p-5">
+          <div>
+            <p className="font-display text-lg font-semibold">
+              ¿Prefieres que la IA monte el tuyo?
+            </p>
+            <p className="mt-1 text-sm text-ink/60">
+              Responde 5 preguntas y te proponemos un setup personalizado.
+            </p>
+          </div>
+          <Button to="/crear-mi-setup" className="md:ml-auto">
+            Crear mi setup con IA
+          </Button>
+        </div>
 
         <div className="mt-8">
           {setups.isPending && <p>Cargando setups…</p>}
