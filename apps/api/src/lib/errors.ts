@@ -6,11 +6,13 @@ export type ErrorCode =
   | "INVALID_SLOT"
   | "UNAUTHENTICATED"
   | "INVALID_CREDENTIALS"
-  | "EMAIL_TAKEN";
+  | "EMAIL_TAKEN"
+  | "AI_UNAVAILABLE"
+  | "AI_INVALID";
 
 export function sendError(
   reply: FastifyReply,
-  status: 400 | 401 | 404 | 409,
+  status: 400 | 401 | 404 | 409 | 502 | 503,
   code: ErrorCode,
   message: string,
 ): unknown {
