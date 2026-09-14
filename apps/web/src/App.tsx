@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { Container } from "./design-system";
 import { Catalog } from "./pages/Catalog";
 import { Checkout } from "./pages/Checkout";
+import { CrearMiSetup } from "./pages/CrearMiSetup";
 import { Cuenta } from "./pages/Cuenta";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
@@ -68,6 +69,7 @@ export default function App(): JSX.Element {
                   <Route path="/setup/:slug" element={<SetupDetail />} />
                   <Route path="/setups" element={<Setups />} />
                   <Route path="/checkout" element={<Checkout />} />
+                <Route path="/crear-mi-setup" element={<CrearMiSetup />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/registro" element={<Registro />} />
                   <Route path="/cuenta" element={<Cuenta />} />

@@ -80,6 +80,14 @@ export const LoginSchema = z.object({
   password: z.string().min(1).max(200),
 });
 
+export const RecommendSchema = z.object({
+  use: UseSchema,
+  style: StyleSchema,
+  space: z.enum(["S", "M", "L"]),
+  budgetCents: z.number().int().positive(),
+  note: z.string().trim().max(500).optional(),
+});
+
 export function zodMessage(error: z.ZodError): string {
   return error.issues
     .map((issue) => {

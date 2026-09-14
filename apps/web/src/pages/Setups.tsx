@@ -16,7 +16,10 @@ export function Setups(): JSX.Element {
       <section className="py-12">
         <h1 className="font-display text-3xl font-bold">Setups</h1>
         <p className="mt-2 text-ink/60">
-          Espacios coherentes listos para personalizar.
+          Espacios coherentes listos para personalizar.{" "}
+          <Link to="/crear-mi-setup" className="hover:underline">
+            ¿Prefieres que la IA monte el tuyo?
+          </Link>
         </p>
 
         <div className="mt-8">

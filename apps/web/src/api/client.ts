@@ -123,6 +123,34 @@ export async function fetchMyOrders(): Promise<{ data: OrderDTO[] }> {
   return (await res.json()) as { data: OrderDTO[] };
 }
 
+export interface RecommendInput {
+  use: string;
+  style: string;
+  space: "S" | "M" | "L";
+  budgetCents: number;
+  note?: string;
+}
+
+export interface RecommendResult {
+  setup: SetupDTO;
+  setupSlug: string;
+  explanation: string;
+}
+
+export async function recommendSetup(
+  input: RecommendInput,
+): Promise<RecommendResult> {
+  const res = await fetch(`${BASE_URL}/ai/recommend`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    throw new ApiError(res.status, `POST /ai/recommend failed (${res.status})`);
+  }
+  return (await res.json()) as RecommendResult;
+}
+
 export interface CheckoutInput {
   email: string;
   name: string;
