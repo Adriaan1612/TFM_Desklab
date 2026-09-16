@@ -52,14 +52,21 @@ Cuentas y auth, IA. Sin cambios de modelo salvo
 `Product.slot` (requerido por substitutes, migración
 `20260907184631_add_product_slot`).
 
-## POST /checkout (Fase 7)
+## POST /checkout (Fase 7, pago simulado en Fase 10)
 
 Alta de pedido simulado para invitado. El cliente envía solo
 identificadores y cantidades; precios y total se calculan en servidor.
-`email` válido, `name`/`address`/`city`/`postalCode` y `items`
-(`productId`, `quantity` 1–99, `setupSlug?`) requeridos. 404 si un producto
-no existe. Responde `201` con la Order (`orderNumber` autoincremental,
-`totalCents`, items con snapshot de nombre y precio).
+`email` válido, `name`/`address`/`city`/`postalCode`, `payment.last4`
+(4 dígitos) e `items` (`productId`, `quantity` 1–99, `setupSlug?`)
+requeridos. 404 si un producto no existe. Responde `201` con la Order
+(`orderNumber` autoincremental, `totalCents`, items con snapshot de
+nombre y precio).
+
+Pasarela simulada (`chargeSimulated`, sin red ni persistencia): solo viajan
+los últimos 4 dígitos y no se guarda ningún dato de tarjeta (ni siquiera
+`last4`). `last4` con formato inválido → 400; terminada en `0002` →
+`402 PAYMENT_DECLINED` sin crear pedido. Tarjetas de prueba: cualquiera
+válida por Luhn aprueba salvo `…0002`.
 
 ## GET /orders/:id (Fase 7)
 

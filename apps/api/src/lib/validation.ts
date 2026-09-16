@@ -51,6 +51,9 @@ export const CheckoutSchema = z.object({
   address: z.string().trim().min(1).max(200),
   city: z.string().trim().min(1).max(120),
   postalCode: z.string().trim().min(1).max(20),
+  payment: z.object({
+    last4: z.string().regex(/^\d{4}$/),
+  }),
   items: z
     .array(
       z.object({

@@ -3,6 +3,7 @@ import type { Order } from "@prisma/client";
 import type { OrderDTO } from "@desklab/shared";
 import { db } from "../db.js";
 import { sendError } from "../lib/errors.js";
+import { chargeSimulated } from "../lib/payments.js";
 import { resolveUser } from "../lib/session.js";
 import { CheckoutSchema, zodMessage } from "../lib/validation.js";
 
@@ -40,7 +41,8 @@ export async function checkoutRoutes(app: FastifyInstance): Promise<void> {
     if (!parsed.success) {
       return sendError(reply, 400, "BAD_REQUEST", zodMessage(parsed.error));
     }
-    const { email, name, address, city, postalCode, items } = parsed.data;
+    const { email, name, address, city, postalCode, payment, items } =
+      parsed.data;
 
     const products = await db.product.findMany({
       where: { id: { in: [...new Set(items.map((i) => i.productId))] } },
@@ -72,6 +74,23 @@ export async function checkoutRoutes(app: FastifyInstance): Promise<void> {
       (sum, l) => sum + l.priceCents * l.quantity,
       0,
     );
+
+    // Cobro simulado antes de crear el pedido. Solo viajan los últimos 4
+    // dígitos y no se persiste ningún dato de tarjeta.
+    const charge = chargeSimulated({
+      last4: payment.last4,
+      totalCents,
+    });
+    if (!charge.ok) {
+      return sendError(
+        reply,
+        402,
+        "PAYMENT_DECLINED",
+        charge.code === "invalid_card"
+          ? "invalid card"
+          : "card declined (simulated)",
+      );
+    }
 
     // Sesión opcional: solo vincula pedidos hechos ya logueado.
     // Sin backfill de pedidos de invitado anteriores.

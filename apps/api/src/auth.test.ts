@@ -159,6 +159,7 @@ describe("orders ownership", () => {
         address: "Calle 1",
         city: "Madrid",
         postalCode: "28001",
+        payment: { last4: "4242" },
         items: [{ productId, quantity: 1 }],
       },
     });
@@ -207,6 +208,7 @@ describe("orders ownership", () => {
         address: "Calle 2",
         city: "Madrid",
         postalCode: "28002",
+        payment: { last4: "4242" },
         items: [{ productId: prod.json().id, quantity: 1 }],
       },
     });
