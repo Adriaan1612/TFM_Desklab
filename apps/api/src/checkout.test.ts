@@ -1,5 +1,6 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { buildApp } from "./app.js";
+import { db } from "./db.js";
 
 const app = buildApp();
 
@@ -12,13 +13,14 @@ async function productId(slug: string): Promise<string> {
   return res.json().id as string;
 }
 
-function orderBody(productId: string, quantity = 1) {
+function orderBody(productId: string, quantity = 1, last4 = "4242") {
   return {
     email: "test@desklab.es",
     name: "Test User",
     address: "Calle Mayor 1",
     city: "Madrid",
     postalCode: "28001",
+    payment: { last4 },
     items: [{ productId, quantity }],
   };
 }
@@ -91,6 +93,41 @@ describe("POST /checkout", () => {
       payload: orderBody("producto-inexistente"),
     });
     expect(res.statusCode).toBe(404);
+  });
+
+  it("declines card ending 0002 with 402 and creates nothing", async () => {
+    const id = await productId("raton-inalambrico");
+    const before = await db.order.count();
+    const res = await app.inject({
+      method: "POST",
+      url: "/checkout",
+      payload: orderBody(id, 1, "0002"),
+    });
+    expect(res.statusCode).toBe(402);
+    expect(res.json().error.code).toBe("PAYMENT_DECLINED");
+    expect(await db.order.count()).toBe(before);
+  });
+
+  it("rejects malformed last4 and stores no card data", async () => {
+    const id = await productId("raton-inalambrico");
+    const bad = await app.inject({
+      method: "POST",
+      url: "/checkout",
+      payload: { ...orderBody(id), payment: { last4: "12" } },
+    });
+    expect(bad.statusCode).toBe(400);
+    const ok = await app.inject({
+      method: "POST",
+      url: "/checkout",
+      payload: orderBody(id),
+    });
+    expect(ok.statusCode).toBe(201);
+    expect(JSON.stringify(ok.json())).not.toContain("4242");
+    const stored = await db.order.findUnique({
+      where: { id: ok.json().id as string },
+    });
+    expect(stored).toBeTruthy();
+    expect(JSON.stringify(stored)).not.toContain("4242");
   });
 });
 

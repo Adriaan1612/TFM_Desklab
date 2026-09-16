@@ -157,6 +157,7 @@ export interface CheckoutInput {
   address: string;
   city: string;
   postalCode: string;
+  payment: { last4: string };
   items: Array<{ productId: string; quantity: number; setupSlug?: string }>;
 }
 

@@ -37,6 +37,40 @@ function renderCheckout(): void {
   );
 }
 
+function fillStep1(): void {
+  fireEvent.change(screen.getByLabelText("Nombre"), {
+    target: { value: "Test User" },
+  });
+  fireEvent.change(screen.getByLabelText("Email"), {
+    target: { value: "test@desklab.es" },
+  });
+  fireEvent.change(screen.getByLabelText("Dirección"), {
+    target: { value: "Calle Mayor 1" },
+  });
+  fireEvent.change(screen.getByLabelText("Ciudad"), {
+    target: { value: "Madrid" },
+  });
+  fireEvent.change(screen.getByLabelText("Código postal"), {
+    target: { value: "28001" },
+  });
+  fireEvent.click(screen.getByText("Continuar al pago"));
+}
+
+function fillCard(number = "4242 4242 4242 4242"): void {
+  fireEvent.change(screen.getByLabelText("Número de tarjeta"), {
+    target: { value: number },
+  });
+  fireEvent.change(screen.getByLabelText("Mes de caducidad"), {
+    target: { value: "12" },
+  });
+  fireEvent.change(screen.getByLabelText("Año de caducidad"), {
+    target: { value: "30" },
+  });
+  fireEvent.change(screen.getByLabelText("CVC"), {
+    target: { value: "123" },
+  });
+}
+
 beforeEach(() => {
   localStorage.clear();
 });
@@ -53,7 +87,7 @@ describe("Checkout", () => {
     expect(screen.getByText(/tu carrito está vacío/i)).toBeInTheDocument();
   });
 
-  it("confirms an order and clears the cart", async () => {
+  it("goes through both steps and confirms with masked card", async () => {
     localStorage.setItem("desklab-cart", JSON.stringify([line]));
     vi.stubGlobal(
       "fetch",
@@ -68,67 +102,67 @@ describe("Checkout", () => {
               name: "Test User",
               totalCents: 12900,
               createdAt: new Date().toISOString(),
-              items: [],
+              items: [
+                {
+                  productId: "p1",
+                  name: "Teclado mecánico 75%",
+                  priceCents: 12900,
+                  quantity: 1,
+                  setupSlug: null,
+                },
+              ],
             }),
         }),
       ),
     );
     renderCheckout();
-    fireEvent.change(screen.getByLabelText("Nombre"), {
-      target: { value: "Test User" },
-    });
-    fireEvent.change(screen.getByLabelText("Email"), {
-      target: { value: "test@desklab.es" },
-    });
-    fireEvent.change(screen.getByLabelText("Dirección"), {
-      target: { value: "Calle Mayor 1" },
-    });
-    fireEvent.change(screen.getByLabelText("Ciudad"), {
-      target: { value: "Madrid" },
-    });
-    fireEvent.change(screen.getByLabelText("Código postal"), {
-      target: { value: "28001" },
-    });
-    fireEvent.click(screen.getByText(/confirmar pedido/i));
+    fillStep1();
+    expect(
+      await screen.findByText("Paso 2 de 2: pago simulado"),
+    ).toBeInTheDocument();
+    fillCard();
+    fireEvent.click(screen.getByText("Pagar ahora"));
     expect(await screen.findByText("Pedido #42")).toBeInTheDocument();
+    expect(screen.getByText(/Teclado mecánico 75%/)).toBeInTheDocument();
+    expect(screen.getByText(/•••• 4242/)).toBeInTheDocument();
+    expect(screen.queryByText(/pagado \(simulado\)/i)).not.toBeInTheDocument();
     expect(
       JSON.parse(localStorage.getItem("desklab-cart") ?? "[]"),
     ).toHaveLength(0);
   });
 
-  it("shows form error on bad request", async () => {
+  it("keeps the cart on declined card", async () => {
     localStorage.setItem("desklab-cart", JSON.stringify([line]));
     vi.stubGlobal(
       "fetch",
-      vi.fn(() => Promise.resolve({ ok: false, status: 400 })),
+      vi.fn(() => Promise.resolve({ ok: false, status: 402 })),
     );
     renderCheckout();
-    fireEvent.change(screen.getByLabelText("Nombre"), {
-      target: { value: "Test User" },
-    });
-    fireEvent.change(screen.getByLabelText("Email"), {
-      target: { value: "test@desklab.es" },
-    });
-    fireEvent.change(screen.getByLabelText("Dirección"), {
-      target: { value: "Calle Mayor 1" },
-    });
-    fireEvent.change(screen.getByLabelText("Ciudad"), {
-      target: { value: "Madrid" },
-    });
-    fireEvent.change(screen.getByLabelText("Código postal"), {
-      target: { value: "28001" },
-    });
-    fireEvent.click(screen.getByText(/confirmar pedido/i));
+    fillStep1();
+    await screen.findByText("Paso 2 de 2: pago simulado");
+    fillCard("4000 0000 0000 0002");
+    fireEvent.click(screen.getByText("Pagar ahora"));
     expect(
-      await screen.findByText("Revisa los datos del formulario."),
+      await screen.findByText("Tarjeta rechazada (simulación). Prueba con otra tarjeta."),
     ).toBeInTheDocument();
-    // El carrito no se vacía tras un error: la línea sigue en localStorage.
     const stored = JSON.parse(
       localStorage.getItem("desklab-cart") ?? "[]",
     ) as Array<{ product: { slug: string }; quantity: number }>;
     expect(stored).toHaveLength(1);
     expect(stored[0].product.slug).toBe("teclado-mecanico-75");
-    expect(stored[0].quantity).toBe(1);
-    expect(screen.getByText(/Teclado mecánico 75%/)).toBeInTheDocument();
+  });
+
+  it("blocks pay with invalid card data", async () => {
+    localStorage.setItem("desklab-cart", JSON.stringify([line]));
+    const fetchMock = vi.fn(() =>
+      Promise.resolve({ ok: true, json: () => Promise.resolve({}) }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    renderCheckout();
+    fillStep1();
+    await screen.findByText("Paso 2 de 2: pago simulado");
+    fillCard("4242 4242 4242 4241");
+    expect(screen.getByText("Pagar ahora")).toBeDisabled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
