@@ -122,7 +122,9 @@ describe("Checkout", () => {
     ).toBeInTheDocument();
     fillCard();
     fireEvent.click(screen.getByText("Pagar ahora"));
-    expect(await screen.findByText("Pedido #42")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Pedido #42" }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Teclado mecánico 75%/)).toBeInTheDocument();
     expect(screen.getByText(/•••• 4242/)).toBeInTheDocument();
     expect(screen.queryByText(/pagado \(simulado\)/i)).not.toBeInTheDocument();

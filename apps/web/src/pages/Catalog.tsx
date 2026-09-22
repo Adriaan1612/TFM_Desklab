@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
+import type { ReactNode } from "react";
 import { fetchProducts } from "../api/client";
 import {
   Badge,
@@ -7,6 +8,7 @@ import {
   Card,
   Container,
   Price,
+  SkeletonGrid,
 } from "../design-system";
 
 const DEFAULT_PAGE_SIZE = 12;
@@ -22,28 +24,59 @@ const CATEGORIES = [
 const STYLES = ["Minimal", "Natural", "Dark", "RGB"];
 const USES = ["Work", "Gaming", "Study", "Streaming", "Mixed"];
 
+const SORTS = [
+  { value: "default", label: "Orden por defecto" },
+  { value: "price-asc", label: "Precio: menor a mayor" },
+  { value: "price-desc", label: "Precio: mayor a menor" },
+  { value: "name-asc", label: "Nombre: A–Z" },
+  { value: "name-desc", label: "Nombre: Z–A" },
+];
+
+function updateParams(
+  params: URLSearchParams,
+  setParams: (next: URLSearchParams) => void,
+  next: Record<string, string | undefined>,
+  resetPage = true,
+): void {
+  const updated = new URLSearchParams(params);
+  for (const [key, value] of Object.entries(next)) {
+    if (!value) {
+      updated.delete(key);
+    } else {
+      updated.set(key, value);
+    }
+  }
+  if (resetPage) updated.set("page", "1");
+  setParams(updated);
+}
+
+const selectCls =
+  "appearance-none rounded-full border border-line bg-white pl-4 pr-9 py-2 text-sm text-ink";
+
+function SelectWrap({ children }: { children: ReactNode }): JSX.Element {
+  return (
+    <span className="relative inline-flex items-center text-ink/60">
+      {children}
+      <svg
+        aria-hidden
+        width="12"
+        height="12"
+        viewBox="0 0 12 12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        className="pointer-events-none absolute right-3"
+      >
+        <path d="M3 4.5 6 7.5 9 4.5" />
+      </svg>
+    </span>
+  );
+}
+
 function FilterBar(): JSX.Element {
   const [params, setParams] = useSearchParams();
-
-  function update(next: Record<string, string | undefined>): void {
-    const updated = new URLSearchParams(params);
-    for (const [key, value] of Object.entries(next)) {
-      if (!value) {
-        updated.delete(key);
-      } else {
-        updated.set(key, value);
-      }
-    }
-    updated.set("page", "1");
-    setParams(updated);
-  }
-
-  function reset(): void {
-    setParams({});
-  }
-
-  const selectCls =
-    "rounded-full border border-line bg-white px-4 py-2 text-sm text-ink";
+  const update = (next: Record<string, string | undefined>): void =>
+    updateParams(params, setParams, next);
 
   return (
     <form
@@ -52,58 +85,137 @@ function FilterBar(): JSX.Element {
     >
       <label className="flex flex-col gap-1 text-xs text-ink/60">
         Categoría
-        <select
-          aria-label="Categoría"
-          className={selectCls}
-          value={params.get("category") ?? ""}
-          onChange={(e) =>
-            update({ category: e.target.value || undefined })
-          }
-        >
-          <option value="">Todas</option>
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+        <SelectWrap>
+          <select
+            aria-label="Categoría"
+            className={selectCls}
+            value={params.get("category") ?? ""}
+            onChange={(e) =>
+              update({ category: e.target.value || undefined })
+            }
+          >
+            <option value="">Todas</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </SelectWrap>
       </label>
       <label className="flex flex-col gap-1 text-xs text-ink/60">
         Estilo
-        <select
-          aria-label="Estilo"
-          className={selectCls}
-          value={params.get("style") ?? ""}
-          onChange={(e) => update({ style: e.target.value || undefined })}
-        >
-          <option value="">Todos</option>
-          {STYLES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+        <SelectWrap>
+          <select
+            aria-label="Estilo"
+            className={selectCls}
+            value={params.get("style") ?? ""}
+            onChange={(e) => update({ style: e.target.value || undefined })}
+          >
+            <option value="">Todos</option>
+            {STYLES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </SelectWrap>
       </label>
       <label className="flex flex-col gap-1 text-xs text-ink/60">
         Uso
-        <select
-          aria-label="Uso"
-          className={selectCls}
-          value={params.get("use") ?? ""}
-          onChange={(e) => update({ use: e.target.value || undefined })}
-        >
-          <option value="">Todos</option>
-          {USES.map((u) => (
-            <option key={u} value={u}>
-              {u}
-            </option>
-          ))}
-        </select>
+        <SelectWrap>
+          <select
+            aria-label="Uso"
+            className={selectCls}
+            value={params.get("use") ?? ""}
+            onChange={(e) => update({ use: e.target.value || undefined })}
+          >
+            <option value="">Todos</option>
+            {USES.map((u) => (
+              <option key={u} value={u}>
+                {u}
+              </option>
+            ))}
+          </select>
+        </SelectWrap>
       </label>
-      <Button variant="secondary" onClick={reset}>
+      <Button variant="secondary" onClick={() => setParams({})}>
         Limpiar
       </Button>
     </form>
+  );
+}
+
+function sortValue(params: URLSearchParams): string {
+  const sort = params.get("sort");
+  const order = params.get("order") ?? "asc";
+  if (sort === "price" || sort === "name") return `${sort}-${order}`;
+  return "default";
+}
+
+function SortBar(): JSX.Element {
+  const [params, setParams] = useSearchParams();
+
+  function change(value: string): void {
+    if (value === "default") {
+      const updated = new URLSearchParams(params);
+      updated.delete("sort");
+      updated.delete("order");
+      updated.set("page", "1");
+      setParams(updated);
+      return;
+    }
+    const [sort, order] = value.split("-");
+    updateParams(params, setParams, {
+      sort,
+      order,
+    });
+  }
+
+  return (
+    <label className="flex items-center gap-2 text-xs text-ink/60">
+      Ordenar
+      <SelectWrap>
+        <select
+          aria-label="Ordenar"
+          className={selectCls}
+          value={sortValue(params)}
+          onChange={(e) => change(e.target.value)}
+        >
+          {SORTS.map((s) => (
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+      </SelectWrap>
+    </label>
+  );
+}
+
+function ActiveChips(): JSX.Element | null {
+  const [params, setParams] = useSearchParams();
+  const chips = (["category", "style", "use"] as const)
+    .map((key) => ({ key, value: params.get(key) }))
+    .filter((c) => c.value !== null);
+  if (chips.length === 0) return null;
+  return (
+    <ul aria-label="Filtros activos" className="flex flex-wrap gap-2">
+      {chips.map((chip) => (
+        <li key={chip.key}>
+          <button
+            type="button"
+            onClick={() =>
+              updateParams(params, setParams, { [chip.key]: undefined })
+            }
+            aria-label={`Quitar filtro ${chip.value}`}
+            className="inline-flex items-center gap-1 rounded-full bg-moss-soft px-3 py-1 text-xs font-medium text-moss-dark hover:underline"
+          >
+            {chip.value} <span aria-hidden>×</span>
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -178,26 +290,44 @@ export function Catalog(): JSX.Element {
         <p className="mt-2 text-ink/60">
           Filtra por categoría, estilo y uso. Precios con IVA incluido.
         </p>
-        <div className="mt-6">
+        <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
           <FilterBar />
+          <SortBar />
+        </div>
+        <div className="mt-4">
+          <ActiveChips />
         </div>
 
         <div className="mt-8">
-          {products.isPending && <p>Cargando productos…</p>}
+          {products.isPending && <SkeletonGrid count={6} />}
           {products.isError && (
-            <p role="alert">
-              No hemos podido cargar el catálogo. Inténtalo de nuevo más
-              tarde.
+            <div>
+              <p role="alert">
+                No hemos podido cargar el catálogo. Inténtalo de nuevo más
+                tarde.
+              </p>
+              <div className="mt-4">
+                <Button variant="secondary" onClick={() => products.refetch()}>
+                  Reintentar
+                </Button>
+              </div>
+            </div>
+          )}
+          {products.data && (
+            <p className="text-sm text-ink/60" aria-live="polite">
+              {products.data.total === 1
+                ? "1 producto"
+                : `${products.data.total} productos`}
             </p>
           )}
           {products.data && products.data.total === 0 && (
-            <p>
+            <p className="mt-4">
               Sin resultados para estos filtros. Prueba a limpiar la búsqueda.
             </p>
           )}
           {products.data && products.data.total > 0 && (
             <>
-              <div className="grid gap-6 md:grid-cols-3">
+              <div className="mt-4 grid gap-6 md:grid-cols-3">
                 {products.data.data.map((product) => (
                   <Card key={product.id}>
                     <div className="flex flex-wrap gap-2">

@@ -78,6 +78,40 @@ describe("GET /products", () => {
     });
     expect(badPage.statusCode).toBe(400);
   });
+
+  it("sorts by price ascending with cheapest first", async () => {
+    const res = await app.inject({
+      method: "GET",
+      url: "/products?sort=price&order=asc&pageSize=32",
+    });
+    expect(res.statusCode).toBe(200);
+    const prices = res.json().data.map((p: { priceCents: number }) => p.priceCents);
+    expect(prices).toEqual([...prices].sort((a, b) => a - b));
+    expect(prices[0]).toBe(1500);
+  });
+
+  it("sorts by name descending", async () => {
+    const res = await app.inject({
+      method: "GET",
+      url: "/products?sort=name&order=desc&pageSize=32",
+    });
+    expect(res.statusCode).toBe(200);
+    const names = res.json().data.map((p: { name: string }) => p.name);
+    expect(names).toEqual([...names].sort().reverse());
+  });
+
+  it("rejects invalid sort and order", async () => {
+    const badSort = await app.inject({
+      method: "GET",
+      url: "/products?sort=color",
+    });
+    expect(badSort.statusCode).toBe(400);
+    const badOrder = await app.inject({
+      method: "GET",
+      url: "/products?sort=price&order=sideways",
+    });
+    expect(badOrder.statusCode).toBe(400);
+  });
 });
 
 describe("GET /products/:slug", () => {

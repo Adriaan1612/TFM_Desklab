@@ -85,7 +85,11 @@ describe("ProductDetail", () => {
     const alt = { ...product, id: "2", slug: "teclado-rgb-tkl", name: "Teclado RGB TKL" };
     mockApi([setup], [alt]);
     renderDetail();
-    expect(await screen.findByText("Teclado mecánico 75%")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Teclado mecánico 75%" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Inicio")).toHaveAttribute("href", "/");
+    expect(screen.getByText("Catálogo")).toHaveAttribute("href", "/catalogo");
     expect(screen.getByText("← Volver al catálogo")).toHaveAttribute(
       "href",
       "/catalogo",
@@ -191,7 +195,9 @@ describe("ProductDetail", () => {
   it("preserves catalog query params on back links", async () => {
     mockApi([], []);
     renderDetail({ catalogSearch: "?category=Lighting&page=2" });
-    expect(await screen.findByText("Teclado mecánico 75%")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Teclado mecánico 75%" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("← Volver al catálogo")).toHaveAttribute(
       "href",
       "/catalogo?category=Lighting&page=2",

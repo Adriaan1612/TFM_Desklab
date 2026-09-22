@@ -34,6 +34,8 @@ export const ProductsQuerySchema = z.object({
   maxPriceCents: priceCents.optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(50).default(20),
+  sort: z.enum(["price", "name"]).optional(),
+  order: z.enum(["asc", "desc"]).default("asc"),
 });
 
 export const SetupsQuerySchema = z.object({

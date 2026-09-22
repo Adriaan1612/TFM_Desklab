@@ -10,7 +10,7 @@ import {
 } from "@desklab/shared";
 import { ApiError, placeOrder } from "../api/client";
 import { useCart } from "../cart/CartContext";
-import { Button, Container, Price } from "../design-system";
+import { Button, Breadcrumbs, Container, Price } from "../design-system";
 
 const inputCls =
   "w-full rounded-xl border border-line bg-white px-4 py-2.5 text-sm text-ink";
@@ -49,7 +49,14 @@ export function Checkout(): JSX.Element {
     return (
       <Container>
         <section className="py-12">
-          <p className="text-sm font-medium uppercase tracking-widest text-moss-dark">
+          <Breadcrumbs
+            trail={[
+              { label: "Inicio", to: "/" },
+              { label: "Checkout" },
+              { label: `Pedido #${order.orderNumber}` },
+            ]}
+          />
+          <p className="mt-4 text-sm font-medium uppercase tracking-widest text-moss-dark">
             Pedido confirmado
           </p>
           <h1 className="mt-4 font-display text-3xl font-bold">
