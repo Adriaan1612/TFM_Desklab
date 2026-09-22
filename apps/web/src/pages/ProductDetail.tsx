@@ -9,6 +9,7 @@ import {
 import { useCart } from "../cart/CartContext";
 import {
   Badge,
+  Breadcrumbs,
   Button,
   Card,
   Container,
@@ -41,9 +42,18 @@ export function ProductDetail(): JSX.Element {
   return (
     <Container>
       <section className="py-12">
-        <Link to={backTo} className="text-sm hover:underline">
-          ← Volver al catálogo
-        </Link>
+        <Breadcrumbs
+          trail={[
+            { label: "Inicio", to: "/" },
+            { label: "Catálogo", to: "/catalogo" },
+            { label: product.data?.name ?? "Producto" },
+          ]}
+        />
+        <div className="mt-4">
+          <Link to={backTo} className="text-sm hover:underline">
+            ← Volver al catálogo
+          </Link>
+        </div>
 
         {product.isPending && <p className="mt-6">Cargando producto…</p>}
         {product.isError && (

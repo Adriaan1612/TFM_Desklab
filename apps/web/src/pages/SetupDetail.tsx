@@ -10,6 +10,7 @@ import {
 import { useCart } from "../cart/CartContext";
 import {
   Badge,
+  Breadcrumbs,
   Button,
   Card,
   Container,
@@ -146,9 +147,18 @@ export function SetupDetail(): JSX.Element {
   return (
     <Container>
       <section className="py-12">
-        <Link to="/" className="text-sm hover:underline">
-          ← Volver al inicio
-        </Link>
+        <Breadcrumbs
+          trail={[
+            { label: "Inicio", to: "/" },
+            { label: "Setups", to: "/setups" },
+            { label: setup.data?.name ?? "Setup" },
+          ]}
+        />
+        <div className="mt-4">
+          <Link to="/" className="text-sm hover:underline">
+            ← Volver al inicio
+          </Link>
+        </div>
 
         {setup.isPending && <p className="mt-6">Cargando setup…</p>}
         {setup.isError && (

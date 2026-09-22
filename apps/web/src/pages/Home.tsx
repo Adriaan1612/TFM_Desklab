@@ -7,7 +7,30 @@ import {
   Card,
   Container,
   Price,
+  SkeletonGrid,
 } from "../design-system";
+
+const COLLECTIONS = [
+  { style: "Minimal", text: "Menos, pero mejor." },
+  { style: "Natural", text: "Materiales que respiran." },
+  { style: "Dark", text: "Concentración total." },
+  { style: "RGB", text: "Tu espacio, tu luz." },
+];
+
+const VALUES = [
+  {
+    title: "Setups coherentes",
+    text: "Cada espacio está montado con criterio, no es una lista de piezas sueltas.",
+  },
+  {
+    title: "IA sobre catálogo real",
+    text: "Te proponemos setups solo con productos que existen y puedes comprar.",
+  },
+  {
+    title: "Compra simulada sin sorpresas",
+    text: "Precios claros con IVA y pago simulado: aquí no hay cargos reales.",
+  },
+];
 
 export function Home(): JSX.Element {
   const setups = useQuery({ queryKey: ["setups"], queryFn: fetchSetups });
@@ -33,19 +56,69 @@ export function Home(): JSX.Element {
         </div>
       </section>
 
-      <section className="pb-16 md:pb-24">
+      <section aria-label="Colecciones por estilo">
+        <h2 className="font-display text-2xl font-semibold">
+          Explora por estilo
+        </h2>
+        <div className="mt-6 grid gap-6 md:grid-cols-4">
+          {COLLECTIONS.map((c) => (
+            <Card key={c.style}>
+              <h3 className="font-display text-lg font-semibold">
+                <Link
+                  to={`/catalogo?style=${c.style}`}
+                  className="hover:underline"
+                >
+                  {c.style}
+                </Link>
+              </h3>
+              <p className="mt-2 text-sm text-ink/60">{c.text}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section
+        aria-label="Crear setup con IA"
+        className="mt-16 flex flex-wrap items-center gap-4 rounded-2xl border border-line bg-white p-8 md:mt-24"
+      >
+        <div>
+          <h2 className="font-display text-2xl font-semibold">
+            ¿No sabes por dónde empezar?
+          </h2>
+          <p className="mt-2 max-w-xl text-ink/60">
+            Responde 5 preguntas y la IA monta un setup con productos reales
+            del catálogo.
+          </p>
+        </div>
+        <Button to="/crear-mi-setup" className="md:ml-auto">
+          Crear mi setup con IA
+        </Button>
+      </section>
+
+      <section className="py-16 md:py-24">
         <h2 className="font-display text-2xl font-semibold">
           Setups destacados
         </h2>
-        {setups.isPending && <p className="mt-6">Cargando setups…</p>}
+        {setups.isPending && (
+          <div className="mt-6">
+            <SkeletonGrid count={4} />
+          </div>
+        )}
         {setups.isError && (
-          <p className="mt-6" role="alert">
-            No hemos podido cargar los setups. Inténtalo de nuevo más tarde.
-          </p>
+          <div className="mt-6">
+            <p role="alert">
+              No hemos podido cargar los setups. Inténtalo de nuevo más tarde.
+            </p>
+            <div className="mt-4">
+              <Button variant="secondary" onClick={() => setups.refetch()}>
+                Reintentar
+              </Button>
+            </div>
+          </div>
         )}
         {setups.data && (
           <div className="mt-6 grid gap-6 md:grid-cols-2">
-            {setups.data.data.map((setup) => (
+            {setups.data.data.slice(0, 4).map((setup) => (
               <Card key={setup.id}>
                 <div className="flex flex-wrap gap-2">
                   <Badge label={setup.use} />
@@ -64,6 +137,18 @@ export function Home(): JSX.Element {
             ))}
           </div>
         )}
+      </section>
+
+      <section
+        aria-label="Por qué DeskLab"
+        className="grid gap-6 pb-16 md:grid-cols-3 md:pb-24"
+      >
+        {VALUES.map((v) => (
+          <div key={v.title}>
+            <h3 className="font-display text-lg font-semibold">{v.title}</h3>
+            <p className="mt-2 text-sm text-ink/60">{v.text}</p>
+          </div>
+        ))}
       </section>
     </Container>
   );

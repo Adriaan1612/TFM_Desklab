@@ -120,7 +120,9 @@ describe("SetupDetail", () => {
   it("shows slots with live total and adds setup lines to cart", async () => {
     mockSetupApi();
     renderDetail();
-    expect(await screen.findByText("Night Shift")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Night Shift" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Monitor 27 4K")).toBeInTheDocument();
     expect(screen.getByText("478,00 €")).toBeInTheDocument();
     fireEvent.click(screen.getByText("Añadir setup al carrito"));
@@ -136,7 +138,7 @@ describe("SetupDetail", () => {
   it("swapping a slot updates the total", async () => {
     mockSetupApi();
     renderDetail();
-    await screen.findByText("Night Shift");
+    await screen.findByRole("heading", { name: "Night Shift" });
     fireEvent.click(screen.getAllByText("Cambiar")[1]);
     expect(await screen.findByText("Teclado RGB TKL")).toBeInTheDocument();
     fireEvent.click(screen.getByText("Elegir"));

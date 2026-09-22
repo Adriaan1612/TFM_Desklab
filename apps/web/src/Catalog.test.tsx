@@ -1,17 +1,17 @@
 import "@testing-library/jest-dom/vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Catalog } from "./pages/Catalog";
 
-function renderCatalog(): void {
+function renderCatalog(entry = "/catalogo"): void {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={["/catalogo"]}>
+      <MemoryRouter initialEntries={[entry]}>
         <Catalog />
       </MemoryRouter>
     </QueryClientProvider>,
@@ -24,10 +24,10 @@ afterEach(() => {
 });
 
 describe("Catalog states", () => {
-  it("shows loading state", () => {
+  it("shows loading skeletons", () => {
     vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
     renderCatalog();
-    expect(screen.getByText("Cargando productos…")).toBeInTheDocument();
+    expect(screen.getByLabelText("Cargando")).toBeInTheDocument();
   });
 
   it("shows error state", async () => {
@@ -87,5 +87,41 @@ describe("Catalog states", () => {
       "/producto/teclado-mecanico-75",
     );
     expect(screen.getByText("Mostrando 1–2 de 2")).toBeInTheDocument();
+  });
+
+  it("removes active filter chips", async () => {
+    const fetchMock = vi.fn((_url: string) =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({ data: [], page: 1, pageSize: 12, total: 0 }),
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    renderCatalog("/catalogo?category=Lighting");
+    expect(await screen.findByText(/sin resultados/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("Quitar filtro Lighting"));
+    const firstCall = fetchMock.mock.calls.at(-1)?.[0];
+    expect(firstCall).not.toContain("category=");
+  });
+
+  it("syncs sort with the URL and the API", async () => {
+    const fetchMock = vi.fn((_url: string) =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({ data: [], page: 1, pageSize: 12, total: 0 }),
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    renderCatalog();
+    await screen.findByText(/sin resultados/i);
+    fireEvent.change(screen.getByLabelText("Ordenar"), {
+      target: { value: "price-asc" },
+    });
+    await screen.findByText(/sin resultados/i);
+    const lastCall = fetchMock.mock.calls.at(-1)?.[0];
+    expect(lastCall).toContain("sort=price");
+    expect(lastCall).toContain("order=asc");
   });
 });

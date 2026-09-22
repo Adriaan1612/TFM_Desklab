@@ -34,18 +34,19 @@ afterEach(() => {
 });
 
 describe("Setups", () => {
-  it("shows loading state", () => {
+  it("shows loading skeletons and retry on error", () => {
     vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
     renderSetups();
-    expect(screen.getByText("Cargando setups…")).toBeInTheDocument();
+    expect(screen.getByLabelText("Cargando")).toBeInTheDocument();
   });
 
-  it("shows error state", async () => {
+  it("shows error state with retry", async () => {
     vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("down"))));
     renderSetups();
     expect(
       await screen.findByText(/no hemos podido cargar los setups/i),
     ).toBeInTheDocument();
+    expect(screen.getByText("Reintentar")).toBeInTheDocument();
   });
 
   it("lists setups with links to their detail", async () => {

@@ -19,6 +19,8 @@ export async function productRoutes(app: FastifyInstance): Promise<void> {
       maxPriceCents,
       page,
       pageSize,
+      sort,
+      order,
     } = parsed.data;
 
     const where: Prisma.ProductWhereInput = {
@@ -39,7 +41,12 @@ export async function productRoutes(app: FastifyInstance): Promise<void> {
       db.product.count({ where }),
       db.product.findMany({
         where,
-        orderBy: { slug: "asc" },
+        orderBy:
+          sort === "price"
+            ? { priceCents: order }
+            : sort === "name"
+              ? { name: order }
+              : { slug: order },
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
@@ -50,6 +57,8 @@ export async function productRoutes(app: FastifyInstance): Promise<void> {
       page,
       pageSize,
       total,
+      sort: sort ?? null,
+      order,
     };
   });
 

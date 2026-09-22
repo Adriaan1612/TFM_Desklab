@@ -12,13 +12,14 @@
 
 ## Primitivas (`src/design-system/`)
 
-Solo las necesarias para Home y Catálogo. Nada más.
-
 - `Button` (`primary`/`secondary`, acepta `to` para navegar o `onClick`).
 - `Card` (contenedor blanco con borde suave).
 - `Badge` (etiqueta para categoría/estilo/uso).
 - `Price` (céntimos → EUR con `Intl`, `es-ES`).
 - `Container` (ancho máximo + padding lateral).
+- `Breadcrumbs` (migas Inicio / sección / página actual).
+- `SkeletonCard`/`SkeletonGrid` (carga de listados).
+- `Footer` (a nivel App: marca, navegación y "Proyecto académico — TFM").
 
 ## Páginas
 

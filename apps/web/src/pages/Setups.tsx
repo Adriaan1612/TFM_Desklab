@@ -7,6 +7,7 @@ import {
   Card,
   Container,
   Price,
+  SkeletonGrid,
 } from "../design-system";
 
 export function Setups(): JSX.Element {
@@ -34,11 +35,19 @@ export function Setups(): JSX.Element {
         </div>
 
         <div className="mt-8">
-          {setups.isPending && <p>Cargando setups…</p>}
+          {setups.isPending && <SkeletonGrid count={6} />}
           {setups.isError && (
-            <p role="alert">
-              No hemos podido cargar los setups. Inténtalo de nuevo más tarde.
-            </p>
+            <div>
+              <p role="alert">
+                No hemos podido cargar los setups. Inténtalo de nuevo más
+                tarde.
+              </p>
+              <div className="mt-4">
+                <Button variant="secondary" onClick={() => setups.refetch()}>
+                  Reintentar
+                </Button>
+              </div>
+            </div>
           )}
           {setups.data && setups.data.data.length === 0 && (
             <p>Aún no hay setups publicados.</p>
