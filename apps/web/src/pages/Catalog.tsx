@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
+import type { ReactNode } from "react";
 import { fetchProducts } from "../api/client";
 import {
   Badge,
@@ -49,13 +50,33 @@ function updateParams(
   setParams(updated);
 }
 
+const selectCls =
+  "appearance-none rounded-full border border-line bg-white pl-4 pr-9 py-2 text-sm text-ink";
+
+function SelectWrap({ children }: { children: ReactNode }): JSX.Element {
+  return (
+    <span className="relative inline-flex items-center text-ink/60">
+      {children}
+      <svg
+        aria-hidden
+        width="12"
+        height="12"
+        viewBox="0 0 12 12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        className="pointer-events-none absolute right-3"
+      >
+        <path d="M3 4.5 6 7.5 9 4.5" />
+      </svg>
+    </span>
+  );
+}
+
 function FilterBar(): JSX.Element {
   const [params, setParams] = useSearchParams();
   const update = (next: Record<string, string | undefined>): void =>
     updateParams(params, setParams, next);
-
-  const selectCls =
-    "rounded-full border border-line bg-white px-4 py-2 text-sm text-ink";
 
   return (
     <form
@@ -64,53 +85,59 @@ function FilterBar(): JSX.Element {
     >
       <label className="flex flex-col gap-1 text-xs text-ink/60">
         Categoría
-        <select
-          aria-label="Categoría"
-          className={selectCls}
-          value={params.get("category") ?? ""}
-          onChange={(e) =>
-            update({ category: e.target.value || undefined })
-          }
-        >
-          <option value="">Todas</option>
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+        <SelectWrap>
+          <select
+            aria-label="Categoría"
+            className={selectCls}
+            value={params.get("category") ?? ""}
+            onChange={(e) =>
+              update({ category: e.target.value || undefined })
+            }
+          >
+            <option value="">Todas</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </SelectWrap>
       </label>
       <label className="flex flex-col gap-1 text-xs text-ink/60">
         Estilo
-        <select
-          aria-label="Estilo"
-          className={selectCls}
-          value={params.get("style") ?? ""}
-          onChange={(e) => update({ style: e.target.value || undefined })}
-        >
-          <option value="">Todos</option>
-          {STYLES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+        <SelectWrap>
+          <select
+            aria-label="Estilo"
+            className={selectCls}
+            value={params.get("style") ?? ""}
+            onChange={(e) => update({ style: e.target.value || undefined })}
+          >
+            <option value="">Todos</option>
+            {STYLES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </SelectWrap>
       </label>
       <label className="flex flex-col gap-1 text-xs text-ink/60">
         Uso
-        <select
-          aria-label="Uso"
-          className={selectCls}
-          value={params.get("use") ?? ""}
-          onChange={(e) => update({ use: e.target.value || undefined })}
-        >
-          <option value="">Todos</option>
-          {USES.map((u) => (
-            <option key={u} value={u}>
-              {u}
-            </option>
-          ))}
-        </select>
+        <SelectWrap>
+          <select
+            aria-label="Uso"
+            className={selectCls}
+            value={params.get("use") ?? ""}
+            onChange={(e) => update({ use: e.target.value || undefined })}
+          >
+            <option value="">Todos</option>
+            {USES.map((u) => (
+              <option key={u} value={u}>
+                {u}
+              </option>
+            ))}
+          </select>
+        </SelectWrap>
       </label>
       <Button variant="secondary" onClick={() => setParams({})}>
         Limpiar
@@ -148,18 +175,20 @@ function SortBar(): JSX.Element {
   return (
     <label className="flex items-center gap-2 text-xs text-ink/60">
       Ordenar
-      <select
-        aria-label="Ordenar"
-        className="rounded-full border border-line bg-white px-4 py-2 text-sm text-ink"
-        value={sortValue(params)}
-        onChange={(e) => change(e.target.value)}
-      >
-        {SORTS.map((s) => (
-          <option key={s.value} value={s.value}>
-            {s.label}
-          </option>
-        ))}
-      </select>
+      <SelectWrap>
+        <select
+          aria-label="Ordenar"
+          className={selectCls}
+          value={sortValue(params)}
+          onChange={(e) => change(e.target.value)}
+        >
+          {SORTS.map((s) => (
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+      </SelectWrap>
     </label>
   );
 }

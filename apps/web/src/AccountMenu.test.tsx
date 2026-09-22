@@ -46,10 +46,19 @@ afterEach(() => {
 });
 
 describe("AccountMenu", () => {
-  it("shows Entrar link when anonymous, without user name", async () => {
+  it("shows person icon after cart when anonymous", async () => {
     renderApp(null);
-    expect(await screen.findByText("Entrar")).toHaveAttribute("href", "/login");
-    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    const icon = await screen.findByRole("link", {
+      name: "Entrar en mi cuenta",
+    });
+    expect(icon).toHaveAttribute("href", "/login");
+    const nav = within(screen.getByRole("banner")).getByRole("navigation");
+    const order = within(nav)
+      .getAllByRole("link")
+      .map((el) => el.getAttribute("href"));
+    expect(order.indexOf("/login")).toBeGreaterThan(
+      order.indexOf("/catalogo"),
+    );
   });
 
   it("shows avatar initial without name and opens Mi cuenta", async () => {

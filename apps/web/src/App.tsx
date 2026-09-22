@@ -43,8 +43,23 @@ function AccountMenu(): JSX.Element {
 
   if (!user) {
     return (
-      <Link to="/login" className="hover:underline">
-        Entrar
+      <Link
+        to="/login"
+        aria-label="Entrar en mi cuenta"
+        className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-ink/70 hover:text-ink"
+      >
+        <svg
+          aria-hidden
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        >
+          <circle cx="8" cy="5" r="2.5" />
+          <path d="M2.5 14c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5" />
+        </svg>
       </Link>
     );
   }
@@ -107,7 +122,6 @@ function Header(): JSX.Element {
             <Link to="/catalogo" className="hover:underline">
               Catálogo
             </Link>
-            <AccountMenu />
             <button
               type="button"
               onClick={openCart}
@@ -116,6 +130,7 @@ function Header(): JSX.Element {
             >
               Carrito ({count})
             </button>
+            <AccountMenu />
           </div>
         </nav>
       </Container>
