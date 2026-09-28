@@ -125,12 +125,14 @@ describe("GET /products/:slug", () => {
       id: expect.any(String),
       slug: "teclado-mecanico-75",
       name: "Teclado mecánico 75%",
+      description:
+        "Teclado mecánico compacto al 75% con tacto preciso. Ocupa poco y responde bien tanto en trabajo como en juego.",
       category: "Peripherals",
       slot: "Keyboard",
       styles: expect.arrayContaining(["Minimal", "Dark"]),
       uses: expect.arrayContaining(["Work", "Gaming"]),
       priceCents: 12900,
-      imageUrl: null,
+      imageUrl: "/img/products/teclado-mecanico-75.webp",
     });
   });
 

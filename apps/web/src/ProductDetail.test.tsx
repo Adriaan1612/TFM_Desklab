@@ -10,6 +10,8 @@ const product = {
   id: "1",
   slug: "teclado-mecanico-75",
   name: "Teclado mecánico 75%",
+  description:
+    "Teclado mecánico compacto al 75% con tacto preciso. Ocupa poco y responde bien.",
   category: "Peripherals",
   slot: "Keyboard",
   styles: ["Minimal", "Dark"],
@@ -87,6 +89,11 @@ describe("ProductDetail", () => {
     renderDetail();
     expect(
       await screen.findByRole("heading", { name: "Teclado mecánico 75%" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Teclado mecánico compacto al 75% con tacto preciso. Ocupa poco y responde bien.",
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText("Inicio")).toHaveAttribute("href", "/");
     expect(screen.getByText("Catálogo")).toHaveAttribute("href", "/catalogo");

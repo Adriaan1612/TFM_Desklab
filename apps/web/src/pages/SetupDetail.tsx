@@ -15,6 +15,7 @@ import {
   Card,
   Container,
   Price,
+  SetupImage,
 } from "../design-system";
 
 function SlotRow({
@@ -187,6 +188,10 @@ export function SetupDetail(): JSX.Element {
               <p className="text-2xl font-semibold">
                 <Price cents={total} />
               </p>
+            </div>
+
+            <div className="mt-6">
+              <SetupImage slug={setup.data.slug} name={setup.data.name} />
             </div>
 
             <div className="mt-8 flex flex-col gap-6">

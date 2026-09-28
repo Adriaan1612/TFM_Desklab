@@ -6,7 +6,8 @@
 Product 1──* SetupItem *──1 Setup
 ```
 
-- **Product**: `id`, `slug` (único), `name`, `category`, `slot` (afinidad 1:1
+- **Product**: `id`, `slug` (único), `name`, `description` (editorial ES,
+  obligatoria), `category`, `slot` (afinidad 1:1
   con un slot de setup, base de substitutes), `styles[]`, `uses[]`,
   `priceCents` (entero, sin floats), `imageUrl?`, `createdAt`.
 - **Setup**: `id`, `slug` (único), `name`, `use`, `style`, `createdAt`.

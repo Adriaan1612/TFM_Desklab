@@ -96,14 +96,21 @@ describe("Home sections", () => {
     window.history.pushState({}, "", "/");
     renderApp(null);
     expect(await screen.findByText("Explora por estilo")).toBeInTheDocument();
-    expect(screen.getByText("Minimal")).toHaveAttribute(
-      "href",
-      "/catalogo?style=Minimal",
-    );
+    expect(
+      screen.getByRole("link", { name: /ver setups de estilo minimal/i }),
+    ).toHaveAttribute("href", "/catalogo?style=Minimal");
     expect(screen.getByText("Crear mi setup con IA")).toHaveAttribute(
       "href",
       "/crear-mi-setup",
     );
     expect(screen.getByText(/Proyecto académico/)).toBeInTheDocument();
+  });
+
+  it("shows hero visual linking to its setup", async () => {
+    window.history.pushState({}, "", "/");
+    renderApp(null);
+    const img = await screen.findByAltText("The Calm Desk");
+    expect(img).toHaveAttribute("src", "/img/setups/the-calm-desk.webp");
+    expect(img.closest("a")).toHaveAttribute("href", "/setup/the-calm-desk");
   });
 });

@@ -20,6 +20,9 @@
 - `Breadcrumbs` (migas Inicio / sección / página actual).
 - `SkeletonCard`/`SkeletonGrid` (carga de listados).
 - `Footer` (a nivel App: marca, navegación y "Proyecto académico — TFM").
+- `SetupCarousel` (Home): scroll-snap sin librerías ni autoplay; 2 visibles
+  en desktop, 1 en mobile con swipe; avance de uno en uno, flechas con
+  `aria-label`, indicadores con `aria-current` y flechas de teclado.
 
 ## Páginas
 
@@ -28,6 +31,8 @@
   la URL, resetea a `page=1`), tarjetas de producto, `Pagination`
   (`page`/`pageSize`/`total` de la API, también en la URL) y estados
   carga/error/vacío.
+- `/producto/:slug` (ProductDetail): descripción editorial bajo el nombre
+  (jerarquía secundaria, `text-ink/70`); no se muestra en tarjetas.
 - Datos con TanStack Query (`src/api/client.ts`, tipado con los DTOs de
   `@desklab/shared`, base `VITE_API_URL` con defecto `http://localhost:3001`).
 

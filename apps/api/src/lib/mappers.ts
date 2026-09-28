@@ -11,6 +11,7 @@ export function toProductDTO(product: Product): ProductDTO {
     id: product.id,
     slug: product.slug,
     name: product.name,
+    description: product.description,
     category: product.category,
     slot: product.slot,
     styles: [...product.styles],
