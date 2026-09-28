@@ -2,11 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { fetchSetups } from "../api/client";
 import {
-  Badge,
   Button,
   Card,
   Container,
-  Price,
+  SetupCarousel,
+  SetupImage,
   SkeletonGrid,
 } from "../design-system";
 
@@ -37,23 +37,32 @@ export function Home(): JSX.Element {
 
   return (
     <Container>
-      <section className="py-16 md:py-24">
-        <p className="text-sm font-medium uppercase tracking-widest text-moss-dark">
-          DeskLab
-        </p>
-        <h1 className="mt-4 max-w-2xl font-display text-4xl font-bold leading-tight md:text-6xl">
-          Tu rincón, bien montado.
-        </h1>
-        <p className="mt-6 max-w-xl text-lg text-ink/70">
-          Descubre setups de escritorio coherentes, explora el catálogo y
-          monta un espacio calmado que encaje contigo.
-        </p>
-        <div className="mt-8 flex gap-3">
-          <Button to="/catalogo">Explorar catálogo</Button>
-          <Button to="/setups" variant="secondary">
-            Ver setups
-          </Button>
+      <section className="grid items-center gap-10 py-20 md:grid-cols-2 md:py-28">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-widest text-moss-dark">
+            DeskLab
+          </p>
+          <h1 className="mt-5 max-w-3xl font-display text-4xl font-bold leading-tight md:text-6xl">
+            Tu rincón, bien montado.
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg text-ink/70">
+            Descubre setups de escritorio coherentes, explora el catálogo y
+            monta un espacio calmado que encaje contigo.
+          </p>
+          <div className="mt-10 flex gap-3">
+            <Button to="/catalogo">Explorar catálogo</Button>
+            <Button to="/setups" variant="secondary">
+              Ver setups
+            </Button>
+          </div>
         </div>
+        <Link
+          to="/setup/the-calm-desk"
+          aria-label="Ver setup The Calm Desk"
+          className="block"
+        >
+          <SetupImage slug="the-calm-desk" name="The Calm Desk" />
+        </Link>
       </section>
 
       <section aria-label="Colecciones por estilo">
@@ -62,16 +71,23 @@ export function Home(): JSX.Element {
         </h2>
         <div className="mt-6 grid gap-6 md:grid-cols-4">
           {COLLECTIONS.map((c) => (
-            <Card key={c.style}>
-              <h3 className="font-display text-lg font-semibold">
-                <Link
-                  to={`/catalogo?style=${c.style}`}
-                  className="hover:underline"
-                >
+            <Card key={c.style} className="transition-colors hover:border-ink/30">
+              <Link
+                to={`/catalogo?style=${c.style}`}
+                className="group block"
+                aria-label={`Ver setups de estilo ${c.style}`}
+              >
+                <h3 className="flex items-center justify-between font-display text-lg font-semibold">
                   {c.style}
-                </Link>
-              </h3>
-              <p className="mt-2 text-sm text-ink/60">{c.text}</p>
+                  <span
+                    aria-hidden
+                    className="transition-transform group-hover:translate-x-0.5"
+                  >
+                    →
+                  </span>
+                </h3>
+                <p className="mt-2 text-sm text-ink/60">{c.text}</p>
+              </Link>
             </Card>
           ))}
         </div>
@@ -117,24 +133,8 @@ export function Home(): JSX.Element {
           </div>
         )}
         {setups.data && (
-          <div className="mt-6 grid gap-6 md:grid-cols-2">
-            {setups.data.data.slice(0, 4).map((setup) => (
-              <Card key={setup.id}>
-                <div className="flex flex-wrap gap-2">
-                  <Badge label={setup.use} />
-                  <Badge label={setup.style} />
-                </div>
-                <h3 className="mt-4 font-display text-xl font-semibold">
-                  <Link to={`/setup/${setup.slug}`} className="hover:underline">
-                    {setup.name}
-                  </Link>
-                </h3>
-                <p className="mt-2 text-sm text-ink/60">
-                  {setup.items.length} productos ·{" "}
-                  <Price cents={setup.totalCents} />
-                </p>
-              </Card>
-            ))}
+          <div className="mt-6">
+            <SetupCarousel setups={setups.data.data} />
           </div>
         )}
       </section>

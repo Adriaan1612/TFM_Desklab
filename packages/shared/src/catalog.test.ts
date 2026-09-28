@@ -12,6 +12,7 @@ function product(overrides: Partial<ProductDTO> = {}): ProductDTO {
     id: "p1",
     slug: "teclado-mecanico-75",
     name: "Teclado mecánico 75%",
+    description: "Teclado mecánico compacto al 75% con tacto preciso.",
     category: "Peripherals",
     slot: "Keyboard",
     styles: ["Minimal"],

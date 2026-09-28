@@ -7,6 +7,7 @@ import {
   Card,
   Container,
   Price,
+  SetupImage,
   SkeletonGrid,
 } from "../design-system";
 
@@ -56,7 +57,8 @@ export function Setups(): JSX.Element {
             <div className="grid gap-6 md:grid-cols-2">
               {setups.data.data.map((setup) => (
                 <Card key={setup.id}>
-                  <div className="flex flex-wrap gap-2">
+                  <SetupImage slug={setup.slug} name={setup.name} />
+                  <div className="mt-4 flex flex-wrap gap-2">
                     <Badge label={setup.use} />
                     <Badge label={setup.style} />
                   </div>

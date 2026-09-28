@@ -6,3 +6,5 @@ export { Container } from "./Container";
 export { Breadcrumbs } from "./Breadcrumbs";
 export { SkeletonCard, SkeletonGrid } from "./SkeletonCard";
 export { Footer } from "./Footer";
+export { ProductImage, SetupImage } from "./ProductImage";
+export { SetupCarousel } from "./SetupCarousel";

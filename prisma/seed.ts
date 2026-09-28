@@ -12,6 +12,7 @@ async function main(): Promise<void> {
     {
       slug: "monitor-27-4k",
       name: "Monitor 27 4K",
+      description: "Monitor de 27 pulgadas con imagen nítida y amplio espacio de trabajo. Ideal para concentrarse durante jornadas largas.",
       category: "Monitors",
       slot: "Monitor",
       styles: ["Minimal", "Dark"],
@@ -21,6 +22,7 @@ async function main(): Promise<void> {
     {
       slug: "monitor-32-curvo",
       name: "Monitor curvo 32",
+      description: "Monitor curvo de 32 pulgadas que envuelve tu campo de visión. Pensado para sesiones de juego inmersivas sin salir del escritorio.",
       category: "Monitors",
       slot: "Monitor",
       styles: ["Dark", "RGB"],
@@ -30,6 +32,7 @@ async function main(): Promise<void> {
     {
       slug: "monitor-24-fhd",
       name: "Monitor 24 FHD",
+      description: "Monitor compacto de 24 pulgadas, equilibrado y sin distracciones. Una base honesta para trabajar y estudiar cada día.",
       category: "Monitors",
       slot: "Monitor",
       styles: ["Minimal", "Natural"],
@@ -39,6 +42,7 @@ async function main(): Promise<void> {
     {
       slug: "monitor-portatil-156",
       name: "Monitor portátil 15,6",
+      description: "Monitor portátil de 15,6 pulgadas que amplía tu espacio donde sea. Ligero y fácil de guardar al terminar la jornada.",
       category: "Monitors",
       slot: "Monitor",
       styles: ["Minimal"],
@@ -48,6 +52,7 @@ async function main(): Promise<void> {
     {
       slug: "brazo-monitor-individual",
       name: "Brazo de monitor individual",
+      description: "Brazo articulado para un monitor que libera la superficie del escritorio. Ajuste sencillo para una postura cómoda todo el día.",
       category: "Stands",
       slot: "MonitorArm",
       styles: ["Minimal", "Dark"],
@@ -57,6 +62,7 @@ async function main(): Promise<void> {
     {
       slug: "soporte-dual",
       name: "Soporte doble monitor",
+      description: "Soporte doble para dos monitores alineados a la misma altura. Orden visual para configuraciones exigentes.",
       category: "Stands",
       slot: "MonitorArm",
       styles: ["Dark"],
@@ -66,6 +72,7 @@ async function main(): Promise<void> {
     {
       slug: "base-madera-monitor",
       name: "Base de madera para monitor",
+      description: "Base de madera que eleva el monitor y deja hueco debajo. Calidez natural para un escritorio sereno y recogido.",
       category: "Stands",
       slot: "MonitorArm",
       styles: ["Natural"],
@@ -75,6 +82,7 @@ async function main(): Promise<void> {
     {
       slug: "teclado-mecanico-75",
       name: "Teclado mecánico 75%",
+      description: "Teclado mecánico compacto al 75% con tacto preciso. Ocupa poco y responde bien tanto en trabajo como en juego.",
       category: "Peripherals",
       slot: "Keyboard",
       styles: ["Minimal", "Dark"],
@@ -84,6 +92,7 @@ async function main(): Promise<void> {
     {
       slug: "teclado-minimal-blanco",
       name: "Teclado minimal blanco",
+      description: "Teclado blanco de líneas limpias que aclara cualquier escritorio. Escritura cómoda con una estética serena.",
       category: "Peripherals",
       slot: "Keyboard",
       styles: ["Minimal", "Natural"],
@@ -93,6 +102,7 @@ async function main(): Promise<void> {
     {
       slug: "teclado-ergonomico",
       name: "Teclado ergonómico dividido",
+      description: "Teclado dividido que respeta la posición natural de las manos. Diseñado para escribir muchas horas con calma.",
       category: "Peripherals",
       slot: "Keyboard",
       styles: ["Minimal"],
@@ -102,6 +112,7 @@ async function main(): Promise<void> {
     {
       slug: "teclado-rgb-tkl",
       name: "Teclado RGB TKL",
+      description: "Teclado sin bloque numérico con retroiluminación RGB. Compacto, expresivo y siempre listo para jugar.",
       category: "Peripherals",
       slot: "Keyboard",
       styles: ["RGB", "Dark"],
@@ -111,6 +122,7 @@ async function main(): Promise<void> {
     {
       slug: "teclado-compacto-60",
       name: "Teclado compacto 60%",
+      description: "Teclado 60% mínimo que deja sitio al ratón. Perfecto para escritorios pequeños sin renunciar al tacto mecánico.",
       category: "Peripherals",
       slot: "Keyboard",
       styles: ["Minimal", "Dark"],
@@ -120,6 +132,7 @@ async function main(): Promise<void> {
     {
       slug: "raton-inalambrico",
       name: "Ratón inalámbrico",
+      description: "Ratón inalámbrico preciso y silencioso para el día a día. Se mueve libre, sin cables por en medio.",
       category: "Peripherals",
       slot: "Mouse",
       styles: ["Minimal", "Dark"],
@@ -129,6 +142,7 @@ async function main(): Promise<void> {
     {
       slug: "raton-ergonomico-vertical",
       name: "Ratón ergonómico vertical",
+      description: "Ratón vertical que mantiene la muñeca en posición neutra. Alivio real para las jornadas largas de trabajo.",
       category: "Peripherals",
       slot: "Mouse",
       styles: ["Minimal", "Natural"],
@@ -138,6 +152,7 @@ async function main(): Promise<void> {
     {
       slug: "raton-gaming-rgb",
       name: "Ratón gaming RGB",
+      description: "Ratón para jugar con respuesta rápida e iluminación RGB. Agarre seguro incluso en las partidas intensas.",
       category: "Peripherals",
       slot: "Mouse",
       styles: ["RGB", "Dark"],
@@ -147,6 +162,7 @@ async function main(): Promise<void> {
     {
       slug: "raton-simetrico",
       name: "Ratón simétrico",
+      description: "Ratón simétrico, válido para diestros y zurdos. Un diseño sencillo y ligero que siempre está a mano.",
       category: "Peripherals",
       slot: "Mouse",
       styles: ["Minimal"],
@@ -156,6 +172,7 @@ async function main(): Promise<void> {
     {
       slug: "alfombrilla-fieltro",
       name: "Alfombrilla de fieltro",
+      description: "Alfombrilla de fieltro que delimita tu zona de trabajo. Textura agradable que abriga el escritorio.",
       category: "Peripherals",
       slot: "DeskMat",
       styles: ["Minimal", "Natural"],
@@ -165,6 +182,7 @@ async function main(): Promise<void> {
     {
       slug: "alfombrilla-xl-negra",
       name: "Alfombrilla XL negra",
+      description: "Alfombrilla extragrande en negro para teclado y ratón. Superficie uniforme con una presencia discreta.",
       category: "Peripherals",
       slot: "DeskMat",
       styles: ["Dark"],
@@ -174,6 +192,7 @@ async function main(): Promise<void> {
     {
       slug: "alfombrilla-corcho",
       name: "Alfombrilla de corcho",
+      description: "Alfombrilla de corcho natural, cálida al tacto. Un detalle sostenible que ordena la mesa.",
       category: "Peripherals",
       slot: "DeskMat",
       styles: ["Natural"],
@@ -183,6 +202,7 @@ async function main(): Promise<void> {
     {
       slug: "lampara-escritorio-calida",
       name: "Lámpara de escritorio cálida",
+      description: "Lámpara de escritorio con luz cálida que cuida la vista. Ambiente tranquilo para trabajar de noche.",
       category: "Lighting",
       slot: "Lighting",
       styles: ["Minimal", "Natural"],
@@ -192,6 +212,7 @@ async function main(): Promise<void> {
     {
       slug: "barra-luz-monitor",
       name: "Barra de luz para monitor",
+      description: "Barra de luz que se apoya sobre el monitor e ilumina la mesa sin deslumbrar. Más luz, cero trastos.",
       category: "Lighting",
       slot: "Lighting",
       styles: ["Minimal", "Dark"],
@@ -201,6 +222,7 @@ async function main(): Promise<void> {
     {
       slug: "tira-led-rgb",
       name: "Tira LED RGB",
+      description: "Tira LED de colores para perfilar el escritorio. Un toque de luz ambiental cuando cae la tarde.",
       category: "Lighting",
       slot: "Lighting",
       styles: ["RGB", "Dark"],
@@ -210,6 +232,7 @@ async function main(): Promise<void> {
     {
       slug: "lampara-pie-arco",
       name: "Lámpara de pie de arco",
+      description: "Lámpara de pie con arco elegante que baña la zona de trabajo. Luz general con carácter escultórico.",
       category: "Lighting",
       slot: "Lighting",
       styles: ["Natural", "Minimal"],
@@ -219,6 +242,7 @@ async function main(): Promise<void> {
     {
       slug: "bandeja-organizadora",
       name: "Bandeja organizadora",
+      description: "Bandeja para agrupar lo esencial y despejar la mesa de una vez. Cada cosa en su sitio y a la vista.",
       category: "Organization",
       slot: "Organization",
       styles: ["Minimal", "Natural"],
@@ -228,6 +252,7 @@ async function main(): Promise<void> {
     {
       slug: "organizador-cajones-bambu",
       name: "Organizador de cajones de bambú",
+      description: "Organizador de bambú que pone orden dentro de los cajones. Los pequeños objetos dejan de perderse.",
       category: "Organization",
       slot: "Organization",
       styles: ["Natural"],
@@ -237,6 +262,7 @@ async function main(): Promise<void> {
     {
       slug: "soporte-auriculares",
       name: "Soporte para auriculares",
+      description: "Soporte que cuelga los auriculares al alcance de la mano. Libera mesa y los mantiene protegidos.",
       category: "Organization",
       slot: "Organization",
       styles: ["Minimal", "Dark"],
@@ -246,6 +272,7 @@ async function main(): Promise<void> {
     {
       slug: "hub-usb-c",
       name: "Hub USB-C",
+      description: "Hub USB-C que multiplica las conexiones de tu portátil. Un solo cable para tenerlo todo a mano.",
       category: "Organization",
       slot: "Organization",
       styles: ["Minimal"],
@@ -255,6 +282,7 @@ async function main(): Promise<void> {
     {
       slug: "mini-planta",
       name: "Mini planta",
+      description: "Mini planta que pone un punto verde en el escritorio. Pide pocos cuidados y alegra la jornada entera.",
       category: "Decoration",
       slot: "Decoration",
       styles: ["Natural", "Minimal"],
@@ -264,6 +292,7 @@ async function main(): Promise<void> {
     {
       slug: "poster-abstracto",
       name: "Póster abstracto",
+      description: "Póster abstracto en tonos suaves para vestir la pared. Arte tranquilo que completa el rincón.",
       category: "Decoration",
       slot: "Decoration",
       styles: ["Minimal"],
@@ -273,6 +302,7 @@ async function main(): Promise<void> {
     {
       slug: "figura-madera",
       name: "Figura de madera",
+      description: "Figura tallada en madera, pequeña y expresiva. Un objeto con alma para personalizar tu espacio.",
       category: "Decoration",
       slot: "Decoration",
       styles: ["Natural"],
@@ -282,6 +312,7 @@ async function main(): Promise<void> {
     {
       slug: "panel-acustico-hex",
       name: "Panel acústico hexagonal",
+      description: "Panel hexagonal que viste la pared y matiza el eco. Útil para llamadas y directos con mejor sonido.",
       category: "Decoration",
       slot: "Decoration",
       styles: ["Dark"],
@@ -291,6 +322,7 @@ async function main(): Promise<void> {
     {
       slug: "reloj-minimal",
       name: "Reloj minimal",
+      description: "Reloj de diseño mínimo que se lee de un vistazo. La hora, sin pantallas ni distracciones.",
       category: "Decoration",
       slot: "Decoration",
       styles: ["Minimal", "Natural"],
@@ -304,20 +336,24 @@ async function main(): Promise<void> {
       where: { slug: p.slug },
       update: {
         name: p.name,
+        description: p.description,
         category: p.category,
         slot: p.slot,
         priceCents: p.priceCents,
+        imageUrl: `/img/products/${p.slug}.webp`,
         styles: { set: [...p.styles] },
         uses: { set: [...p.uses] },
       },
       create: {
         slug: p.slug,
         name: p.name,
+        description: p.description,
         category: p.category,
         slot: p.slot,
         styles: { set: [...p.styles] },
         uses: { set: [...p.uses] },
         priceCents: p.priceCents,
+        imageUrl: `/img/products/${p.slug}.webp`,
       },
     });
   }

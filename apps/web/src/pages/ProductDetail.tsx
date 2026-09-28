@@ -14,6 +14,7 @@ import {
   Card,
   Container,
   Price,
+  ProductImage,
 } from "../design-system";
 
 export function ProductDetail(): JSX.Element {
@@ -67,14 +68,11 @@ export function ProductDetail(): JSX.Element {
         {product.data && (
           <>
             <div className="mt-6 grid gap-8 md:grid-cols-2">
-              <div
-                aria-hidden
-                className="flex min-h-64 items-center justify-center rounded-2xl bg-moss-soft"
-              >
-                <span className="font-display text-7xl font-bold text-moss-dark">
-                  {product.data.name.charAt(0)}
-                </span>
-              </div>
+              <ProductImage
+                slug={product.data.slug}
+                name={product.data.name}
+                imageUrl={product.data.imageUrl}
+              />
               <div>
                 <div className="flex flex-wrap gap-2">
                   <Badge label={product.data.category} />
@@ -89,6 +87,9 @@ export function ProductDetail(): JSX.Element {
                 <h1 className="mt-4 font-display text-3xl font-bold">
                   {product.data.name}
                 </h1>
+                <p className="mt-3 max-w-xl text-ink/70">
+                  {product.data.description}
+                </p>
                 <p className="mt-4 text-2xl font-semibold">
                   <Price cents={product.data.priceCents} />
                 </p>

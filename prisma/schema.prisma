@@ -51,6 +51,7 @@ model Product {
   id         String     @id @default(cuid())
   slug       String     @unique
   name       String
+  description String
   category   Category
   slot       Slot
   styles     Style[]

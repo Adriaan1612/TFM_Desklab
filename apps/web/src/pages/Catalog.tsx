@@ -8,6 +8,7 @@ import {
   Card,
   Container,
   Price,
+  ProductImage,
   SkeletonGrid,
 } from "../design-system";
 
@@ -330,7 +331,12 @@ export function Catalog(): JSX.Element {
               <div className="mt-4 grid gap-6 md:grid-cols-3">
                 {products.data.data.map((product) => (
                   <Card key={product.id}>
-                    <div className="flex flex-wrap gap-2">
+                    <ProductImage
+                      slug={product.slug}
+                      name={product.name}
+                      imageUrl={product.imageUrl}
+                    />
+                    <div className="mt-4 flex flex-wrap gap-2">
                       <Badge label={product.category} />
                       {product.styles.map((s) => (
                         <Badge key={s} label={s} />
