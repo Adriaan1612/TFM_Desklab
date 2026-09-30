@@ -16,10 +16,13 @@ export interface SetupsResponse {
 
 export class ApiError extends Error {
   readonly status: number;
+  /** Raw `error.message` from the API body, when present (e.g. "postalCode: …"). */
+  readonly detail: string | null;
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, detail: string | null = null) {
     super(message);
     this.status = status;
+    this.detail = detail;
   }
 }
 
@@ -169,7 +172,24 @@ export async function placeOrder(input: CheckoutInput): Promise<OrderDTO> {
     body: JSON.stringify(input),
   });
   if (!res.ok) {
-    throw new ApiError(res.status, `POST /checkout failed (${res.status})`);
+    throw new ApiError(
+      res.status,
+      `POST /checkout failed (${res.status})`,
+      await readErrorDetail(res),
+    );
   }
   return (await res.json()) as OrderDTO;
+}
+
+async function readErrorDetail(res: Response): Promise<string | null> {
+  try {
+    const body = (await res.json()) as {
+      error?: { message?: unknown };
+    };
+    return typeof body.error?.message === "string"
+      ? body.error.message
+      : null;
+  } catch {
+    return null;
+  }
 }
