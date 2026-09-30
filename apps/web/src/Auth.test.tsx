@@ -144,8 +144,7 @@ describe("auth pages", () => {
     expect(screen.getByText("Ratón inalámbrico × 2")).toBeInTheDocument();
   });
 
-  it("updates password requirements while typing", async () => {
-    vi.stubGlobal(
+  it("updates password requirements while typing", async () => {    vi.stubGlobal(
       "fetch",
       vi.fn(() => Promise.resolve({ ok: false, status: 401 })),
     );
@@ -160,5 +159,101 @@ describe("auth pages", () => {
     expect(screen.getByText("✓ Mínimo 8 caracteres")).toBeInTheDocument();
     expect(screen.getByText("✓ Al menos una mayúscula")).toBeInTheDocument();
     expect(screen.getByText("✓ Al menos un número")).toBeInTheDocument();
+  });
+
+  function stubAuthedCuenta(logoutStatus = 200, orderOverrides = {}) {
+    const order = {
+      id: "o1",
+      orderNumber: 7,
+      email: "a@desklab.es",
+      name: "A",
+      totalCents: 11800,
+      createdAt: new Date().toISOString(),
+      items: [
+        {
+          productId: "p1",
+          name: "Ratón inalámbrico",
+          priceCents: 5900,
+          quantity: 2,
+          setupSlug: null,
+        },
+      ],
+      ...orderOverrides,
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (url.endsWith("/auth/me")) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                user: { id: "u1", email: "a@desklab.es", name: "A" },
+              }),
+          });
+        }
+        if (url.endsWith("/auth/logout")) {
+          return Promise.resolve({ ok: logoutStatus === 200, status: logoutStatus });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ data: [order] }),
+        });
+      }),
+    );
+  }
+
+  it("notes that guest orders are not listed", async () => {
+    stubAuthedCuenta();
+    renderAt("/cuenta");
+    await screen.findByText("Pedido #7");
+    expect(
+      screen.getByText(/pedidos realizados como invitado/i),
+    ).toBeInTheDocument();
+  });
+
+  it("renders same product from different origins without key collision", async () => {
+    stubAuthedCuenta(200, {
+      items: [
+        {
+          productId: "p1",
+          name: "Ratón inalámbrico",
+          priceCents: 5900,
+          quantity: 1,
+          setupSlug: null,
+        },
+        {
+          productId: "p1",
+          name: "Ratón inalámbrico",
+          priceCents: 5900,
+          quantity: 1,
+          setupSlug: "night-shift",
+        },
+      ],
+    });
+    renderAt("/cuenta");
+    await screen.findByText("Pedido #7");
+    expect(screen.getAllByText("Ratón inalámbrico × 1")).toHaveLength(2);
+  });
+
+  it("keeps the session and shows retry on logout failure", async () => {
+    stubAuthedCuenta(500);
+    renderAt("/cuenta");
+    await screen.findByText("Pedido #7");
+    fireEvent.click(screen.getByText("Salir", { selector: "button" }));
+    expect(
+      await screen.findByText("No hemos podido cerrar la sesión. Inténtalo de nuevo."),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Pedido #7")).toBeInTheDocument();
+  });
+
+  it("leaves the account on successful logout", async () => {
+    stubAuthedCuenta(200);
+    renderAt("/cuenta");
+    await screen.findByText("Pedido #7");
+    fireEvent.click(screen.getByText("Salir", { selector: "button" }));
+    expect(
+      await screen.findByText("Entra para ver tus pedidos."),
+    ).toBeInTheDocument();
   });
 });

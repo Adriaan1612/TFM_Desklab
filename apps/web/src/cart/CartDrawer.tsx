@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { MAX_LINE_QTY } from "@desklab/shared";
 import { Price } from "../design-system";
 import { useCart } from "./CartContext";
 
@@ -67,7 +68,13 @@ export function CartDrawer(): JSX.Element {
                       <button
                         type="button"
                         aria-label={`Añadir uno de ${line.product.name}`}
-                        className="rounded-full border border-line px-2"
+                        title={
+                          line.quantity >= MAX_LINE_QTY
+                            ? `Máximo ${MAX_LINE_QTY} unidades por línea`
+                            : undefined
+                        }
+                        disabled={line.quantity >= MAX_LINE_QTY}
+                        className="rounded-full border border-line px-2 disabled:opacity-40"
                         onClick={() =>
                           setQuantity(
                             line.product.id,
@@ -94,6 +101,11 @@ export function CartDrawer(): JSX.Element {
                       </button>
                     </span>
                   </div>
+                  {line.quantity >= MAX_LINE_QTY && (
+                    <p className="mt-2 text-xs text-ink/60">
+                      Máximo {MAX_LINE_QTY} unidades por línea.
+                    </p>
+                  )}
                 </li>
               ))}
             </ul>

@@ -110,12 +110,15 @@ async function postAuth(path: string, body: unknown): Promise<AuthUser> {
 }
 
 export async function logout(): Promise<void> {
-  await fetch(`${BASE_URL}/auth/logout`, {
+  const res = await fetch(`${BASE_URL}/auth/logout`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: "{}",
   });
+  if (!res.ok) {
+    throw new ApiError(res.status, `POST /auth/logout failed (${res.status})`);
+  }
 }
 
 export async function fetchMyOrders(): Promise<{ data: OrderDTO[] }> {

@@ -10,6 +10,13 @@ export interface CartLine {
   setupSlug?: string;
 }
 
+/** Tope por línea, espejo del backend (CheckoutSchema: quantity max 99). */
+export const MAX_LINE_QTY = 99;
+
+function clampQty(quantity: number): number {
+  return Math.min(Math.max(quantity, 0), MAX_LINE_QTY);
+}
+
 function sameLine(a: CartLine, productId: string, setupSlug?: string): boolean {
   return a.product.id === productId && (a.setupSlug ?? undefined) === (setupSlug ?? undefined);
 }
@@ -23,7 +30,7 @@ export function addLine(
   if (existing) {
     return lines.map((l) =>
       sameLine(l, product.id, setupSlug)
-        ? { ...l, quantity: l.quantity + 1 }
+        ? { ...l, quantity: clampQty(l.quantity + 1) }
         : l,
     );
   }
@@ -47,8 +54,9 @@ export function setQty(
   if (quantity <= 0) {
     return removeLine(lines, productId, setupSlug);
   }
+  const capped = clampQty(quantity);
   return lines.map((l) =>
-    sameLine(l, productId, setupSlug) ? { ...l, quantity } : l,
+    sameLine(l, productId, setupSlug) ? { ...l, quantity: capped } : l,
   );
 }
 

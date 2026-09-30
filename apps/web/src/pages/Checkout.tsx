@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import type { OrderDTO } from "@desklab/shared";
 import {
   cvcValid,
@@ -8,7 +9,7 @@ import {
   last4Of,
   luhnValid,
 } from "@desklab/shared";
-import { ApiError, placeOrder } from "../api/client";
+import { ApiError, fetchProducts, placeOrder } from "../api/client";
 import { useCart } from "../cart/CartContext";
 import { Button, Breadcrumbs, Container, Price } from "../design-system";
 
@@ -165,6 +166,27 @@ export function Checkout(): JSX.Element {
     postalCode: "",
   });
   const [card, setCard] = useState({ number: "", month: "", year: "", cvc: "" });
+
+  // Las líneas guardan el precio del momento de añadirlas; se revalida contra
+  // la API porque el backend cobra siempre con los precios actuales de la DB.
+  const prices = useQuery({
+    queryKey: ["checkout-prices"],
+    queryFn: () => fetchProducts("pageSize=50"),
+    enabled: lines.length > 0,
+    retry: false,
+    staleTime: 30_000,
+  });
+
+  const priceChanged = useMemo(() => {
+    if (!prices.data || !Array.isArray(prices.data.data)) return false;
+    const current = new Map(
+      prices.data.data.map((p) => [p.id, p.priceCents]),
+    );
+    return lines.some((l) => {
+      const price = current.get(l.product.id);
+      return price === undefined || price !== l.product.priceCents;
+    });
+  }, [prices.data, lines]);
 
   const digits = card.number.replace(/\D/g, "");
   const brand = detectBrand(digits);
@@ -329,6 +351,16 @@ export function Checkout(): JSX.Element {
     <Container>
       <section className="py-12">
         <h1 className="font-display text-3xl font-bold">Checkout</h1>
+        {lines.length > 0 && priceChanged && (
+          <p
+            role="alert"
+            className="mt-6 max-w-2xl rounded-xl border border-line bg-white px-4 py-3 text-sm"
+          >
+            Los precios han cambiado desde que añadiste estos productos (o
+            alguno ya no está disponible). El importe final se calcula con
+            los precios actuales al pagar.
+          </p>
+        )}
         {lines.length === 0 ? (
           <p className="mt-6">
             Tu carrito está vacío.{" "}
