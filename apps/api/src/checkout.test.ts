@@ -108,8 +108,7 @@ describe("POST /checkout", () => {
     expect(await db.order.count()).toBe(before);
   });
 
-  it("rejects malformed last4 and stores no card data", async () => {
-    const id = await productId("raton-inalambrico");
+  it("rejects malformed last4 and stores no card data", async () => {    const id = await productId("raton-inalambrico");
     const bad = await app.inject({
       method: "POST",
       url: "/checkout",
@@ -128,6 +127,59 @@ describe("POST /checkout", () => {
     });
     expect(stored).toBeTruthy();
     expect(JSON.stringify(stored)).not.toContain("4242");
+  });
+
+  it("requires a 5-digit spanish postal code", async () => {
+    const id = await productId("raton-inalambrico");
+    for (const postalCode of ["280", "280041", "28A04", "   ", ""]) {
+      const res = await app.inject({
+        method: "POST",
+        url: "/checkout",
+        payload: { ...orderBody(id), postalCode },
+      });
+      expect(res.statusCode).toBe(400);
+      expect(res.json().error.message).toContain("postalCode");
+    }
+    const ok = await app.inject({
+      method: "POST",
+      url: "/checkout",
+      payload: { ...orderBody(id), postalCode: "28004" },
+    });
+    expect(ok.statusCode).toBe(201);
+  });
+
+  it("rejects whitespace-only fields and overlong names", async () => {
+    const id = await productId("raton-inalambrico");
+    const blank = await app.inject({
+      method: "POST",
+      url: "/checkout",
+      payload: { ...orderBody(id), name: "   " },
+    });
+    expect(blank.statusCode).toBe(400);
+    expect(blank.json().error.message).toContain("name");
+    const long = await app.inject({
+      method: "POST",
+      url: "/checkout",
+      payload: { ...orderBody(id), name: "x".repeat(121) },
+    });
+    expect(long.statusCode).toBe(400);
+    const blankCity = await app.inject({
+      method: "POST",
+      url: "/checkout",
+      payload: { ...orderBody(id), city: "  " },
+    });
+    expect(blankCity.statusCode).toBe(400);
+  });
+
+  it("trims surrounding spaces in the email", async () => {
+    const id = await productId("raton-inalambrico");
+    const res = await app.inject({
+      method: "POST",
+      url: "/checkout",
+      payload: { ...orderBody(id), email: "  test@desklab.es  " },
+    });
+    expect(res.statusCode).toBe(201);
+    expect(res.json().email).toBe("test@desklab.es");
   });
 });
 

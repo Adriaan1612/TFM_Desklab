@@ -168,4 +168,196 @@ describe("Checkout", () => {
     expect(screen.getByText("Pagar ahora")).toBeDisabled();
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it("stays on step 1 with inline errors for blank name and bad postal code", () => {
+    localStorage.setItem("desklab-cart", JSON.stringify([line]));
+    const fetchMock = vi.fn(() =>
+      Promise.resolve({ ok: true, json: () => Promise.resolve({}) }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    renderCheckout();
+    fireEvent.change(screen.getByLabelText("Nombre"), {
+      target: { value: "   " },
+    });
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "test@desklab.es" },
+    });
+    fireEvent.change(screen.getByLabelText("Dirección"), {
+      target: { value: "Calle Mayor 1" },
+    });
+    fireEvent.change(screen.getByLabelText("Ciudad"), {
+      target: { value: "Madrid" },
+    });
+    fireEvent.change(screen.getByLabelText("Código postal"), {
+      target: { value: "280" },
+    });
+    fireEvent.click(screen.getByText("Continuar al pago"));
+    expect(screen.getByText("Escribe tu nombre.")).toBeInTheDocument();
+    expect(
+      screen.getByText("El código postal debe tener 5 dígitos (p. ej. 28004)."),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Paso 1 de 2: tus datos")).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Nombre")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+  });
+
+  it("trims the email before paying", async () => {
+    localStorage.setItem("desklab-cart", JSON.stringify([line]));
+    const fetchMock = vi.fn((_url: string, _init?: { body?: string }) =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            id: "o1",
+            orderNumber: 7,
+            email: "test@desklab.es",
+            name: "Test User",
+            totalCents: 12900,
+            createdAt: new Date().toISOString(),
+            items: [
+              {
+                productId: "p1",
+                name: "Teclado mecánico 75%",
+                priceCents: 12900,
+                quantity: 1,
+                setupSlug: null,
+              },
+            ],
+          }),
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    renderCheckout();
+    fireEvent.change(screen.getByLabelText("Nombre"), {
+      target: { value: "Test User" },
+    });
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "  test@desklab.es  " },
+    });
+    fireEvent.change(screen.getByLabelText("Dirección"), {
+      target: { value: "Calle Mayor 1" },
+    });
+    fireEvent.change(screen.getByLabelText("Ciudad"), {
+      target: { value: "Madrid" },
+    });
+    fireEvent.change(screen.getByLabelText("Código postal"), {
+      target: { value: "28001" },
+    });
+    fireEvent.click(screen.getByText("Continuar al pago"));
+    await screen.findByText("Paso 2 de 2: pago simulado");
+    fillCard();
+    fireEvent.click(screen.getByText("Pagar ahora"));
+    await screen.findByRole("heading", { name: "Pedido #7" });
+    const sentBody = JSON.parse(
+      (fetchMock.mock.calls[0]?.[1] as { body?: string })?.body ?? "{}",
+    ) as { email?: string };
+    expect(sentBody.email).toBe("test@desklab.es");
+  });
+
+  it("returns to step 1 with per-field errors on a 400 with detail", async () => {
+    localStorage.setItem("desklab-cart", JSON.stringify([line]));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve({
+          ok: false,
+          status: 400,
+          json: () =>
+            Promise.resolve({
+              error: {
+                code: "BAD_REQUEST",
+                message: "postalCode: postal code must be 5 digits",
+              },
+            }),
+        }),
+      ),
+    );
+    renderCheckout();
+    fillStep1();
+    await screen.findByText("Paso 2 de 2: pago simulado");
+    fillCard();
+    fireEvent.click(screen.getByText("Pagar ahora"));
+    expect(
+      await screen.findByText(
+        "El código postal debe tener 5 dígitos (p. ej. 28004).",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Paso 1 de 2: tus datos")).toBeInTheDocument();
+    const stored = JSON.parse(
+      localStorage.getItem("desklab-cart") ?? "[]",
+    ) as Array<unknown>;
+    expect(stored).toHaveLength(1);
+  });
+
+  it("mirrors backend length caps with maxLength", () => {
+    localStorage.setItem("desklab-cart", JSON.stringify([line]));
+    renderCheckout();
+    expect(screen.getByLabelText("Nombre")).toHaveAttribute("maxlength", "120");
+    expect(screen.getByLabelText("Dirección")).toHaveAttribute(
+      "maxlength",
+      "200",
+    );
+    expect(screen.getByLabelText("Ciudad")).toHaveAttribute("maxlength", "120");
+    expect(screen.getByLabelText("Código postal")).toHaveAttribute(
+      "maxlength",
+      "5",
+    );
+  });
+
+  function fillStep1WithEmail(email: string): void {
+    fireEvent.change(screen.getByLabelText("Nombre"), {
+      target: { value: "Test User" },
+    });
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: email },
+    });
+    fireEvent.change(screen.getByLabelText("Dirección"), {
+      target: { value: "Calle Mayor 1" },
+    });
+    fireEvent.change(screen.getByLabelText("Ciudad"), {
+      target: { value: "Madrid" },
+    });
+    fireEvent.change(screen.getByLabelText("Código postal"), {
+      target: { value: "28001" },
+    });
+    fireEvent.click(screen.getByText("Continuar al pago"));
+  }
+
+  it("suggests a correction for a likely email typo without blocking", async () => {
+    localStorage.setItem("desklab-cart", JSON.stringify([line]));
+    renderCheckout();
+    fillStep1WithEmail("usuario@gmail.co");
+    expect(
+      await screen.findByText(/¿Quisiste decir/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText("usuario@gmail.com")).toBeInTheDocument();
+    expect(screen.getByText("Paso 1 de 2: tus datos")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Usar esta dirección"));
+    expect(
+      await screen.findByText("Paso 2 de 2: pago simulado"),
+    ).toBeInTheDocument();
+  });
+
+  it("lets the user keep the original email despite the suggestion", async () => {
+    localStorage.setItem("desklab-cart", JSON.stringify([line]));
+    renderCheckout();
+    fillStep1WithEmail("usuario@gmail.co");
+    await screen.findByText(/¿Quisiste decir/i);
+    fireEvent.click(screen.getByText("Continuar igualmente"));
+    expect(
+      await screen.findByText("Paso 2 de 2: pago simulado"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Volver"));
+    expect(screen.getByLabelText("Email")).toHaveValue("usuario@gmail.co");
+  });
+
+  it("shows no suggestion for unknown or correct domains", () => {
+    localStorage.setItem("desklab-cart", JSON.stringify([line]));
+    renderCheckout();
+    fillStep1WithEmail("usuario@empresa.co");
+    expect(screen.queryByText(/¿Quisiste decir/i)).not.toBeInTheDocument();
+  });
 });

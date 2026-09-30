@@ -48,11 +48,14 @@ export const SubstitutesQuerySchema = z.object({
 });
 
 export const CheckoutSchema = z.object({
-  email: z.email(),
+  email: z.string().trim().max(160).email(),
   name: z.string().trim().min(1).max(120),
   address: z.string().trim().min(1).max(200),
   city: z.string().trim().min(1).max(120),
-  postalCode: z.string().trim().min(1).max(20),
+  postalCode: z
+    .string()
+    .trim()
+    .regex(/^\d{5}$/, "postal code must be 5 digits"),
   payment: z.object({
     last4: z.string().regex(/^\d{4}$/),
   }),
@@ -69,7 +72,7 @@ export const CheckoutSchema = z.object({
 });
 
 export const RegisterSchema = z.object({
-  email: z.email().max(160),
+  email: z.string().trim().max(160).email(),
   name: z.string().trim().min(1).max(120),
   password: z
     .string()
@@ -81,7 +84,7 @@ export const RegisterSchema = z.object({
 });
 
 export const LoginSchema = z.object({
-  email: z.email().max(160),
+  email: z.string().trim().max(160).email(),
   password: z.string().min(1).max(200),
 });
 

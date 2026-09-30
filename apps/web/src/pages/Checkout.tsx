@@ -22,12 +22,140 @@ function formatCardNumber(value: string): string {
     .replace(/(\d{4})(?=\d)/g, "$1 ");
 }
 
+interface AddressForm {
+  name: string;
+  email: string;
+  address: string;
+  city: string;
+  postalCode: string;
+}
+
+type AddressField = keyof AddressForm;
+
+const ADDRESS_MAX: Record<AddressField, number> = {
+  name: 120,
+  email: 160,
+  address: 200,
+  city: 120,
+  postalCode: 5,
+};
+
+const POSTAL_CODE_RE = /^\d{5}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const ADDRESS_INVALID: Record<AddressField, string> = {
+  name: "El nombre admite 120 caracteres como máximo.",
+  email: "Escribe un email válido.",
+  address: "La dirección admite 200 caracteres como máximo.",
+  city: "La ciudad admite 120 caracteres como máximo.",
+  postalCode: "El código postal debe tener 5 dígitos (p. ej. 28004).",
+};
+
+const ADDRESS_REQUIRED: Record<AddressField, string> = {
+  name: "Escribe tu nombre.",
+  email: "Escribe tu email.",
+  address: "Escribe tu dirección.",
+  city: "Escribe tu ciudad.",
+  postalCode: "Escribe tu código postal.",
+};
+
+/** Espejo de CheckoutSchema (backend): trim, longitudes y postal ES de 5 dígitos. */
+function validateAddress(form: AddressForm): {
+  errors: Partial<Record<AddressField, string>>;
+  normalized: AddressForm;
+} {
+  const normalized: AddressForm = {
+    name: form.name.trim(),
+    email: form.email.trim(),
+    address: form.address.trim(),
+    city: form.city.trim(),
+    postalCode: form.postalCode.trim(),
+  };
+  const errors: Partial<Record<AddressField, string>> = {};
+  (Object.keys(normalized) as AddressField[]).forEach((field) => {
+    const value = normalized[field];
+    if (!value) {
+      errors[field] = ADDRESS_REQUIRED[field];
+      return;
+    }
+    if (field === "postalCode") {
+      if (!POSTAL_CODE_RE.test(value)) errors[field] = ADDRESS_INVALID[field];
+      return;
+    }
+    if (field === "email") {
+      if (value.length > ADDRESS_MAX.email || !EMAIL_RE.test(value)) {
+        errors[field] = ADDRESS_INVALID[field];
+      }
+      return;
+    }
+    if (value.length > ADDRESS_MAX[field]) errors[field] = ADDRESS_INVALID[field];
+  });
+  return { errors, normalized };
+}
+
+/** Traduce el detalle "campo: motivo; …" de un 400 a errores por campo en español. */
+function mapBackendDetail(detail: string): Partial<Record<AddressField, string>> {
+  const errors: Partial<Record<AddressField, string>> = {};
+  for (const segment of detail.split(";")) {
+    const field = segment.split(":")[0]?.trim() as AddressField;
+    if (
+      field === "name" ||
+      field === "email" ||
+      field === "address" ||
+      field === "city" ||
+      field === "postalCode"
+    ) {
+      errors[field] ??= ADDRESS_INVALID[field];
+    }
+  }
+  return errors;
+}
+
+/**
+ * Typos frecuentes de dominio → dominio probable. Solo ayuda UX no bloqueante:
+ * el backend acepta el dominio original porque puede ser legítimo (p. ej. .co).
+ */
+const EMAIL_DOMAIN_TYPOS: Record<string, string> = {
+  "gmail.co": "gmail.com",
+  "gmial.com": "gmail.com",
+  "gamil.com": "gmail.com",
+  "gmai.com": "gmail.com",
+  "gmal.com": "gmail.com",
+  "gmail.cm": "gmail.com",
+  "gmail.con": "gmail.com",
+  "googlemail.co": "googlemail.com",
+  "hotmail.co": "hotmail.com",
+  "hotmial.com": "hotmail.com",
+  "hotmil.com": "hotmail.com",
+  "hotmail.cm": "hotmail.com",
+  "outlok.com": "outlook.com",
+  "outlook.co": "outlook.com",
+  "yahoo.co": "yahoo.com",
+  "yaho.com": "yahoo.com",
+  "live.co": "live.com",
+  "icloud.co": "icloud.com",
+};
+
+export function suggestEmail(email: string): string | null {
+  const trimmed = email.trim();
+  const at = trimmed.lastIndexOf("@");
+  if (at <= 0) return null;
+  const fixed = EMAIL_DOMAIN_TYPOS[trimmed.slice(at + 1).toLowerCase()];
+  if (!fixed) return null;
+  const corrected = `${trimmed.slice(0, at)}@${fixed}`;
+  return corrected.toLowerCase() === trimmed.toLowerCase() ? null : corrected;
+}
+
 export function Checkout(): JSX.Element {
   const { lines, totalCents, clear } = useCart();
   const [step, setStep] = useState<1 | 2>(1);
   const [order, setOrder] = useState<OrderDTO | null>(null);
   const [last4Used, setLast4Used] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<AddressField, string>>
+  >({});
+  const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -124,6 +252,14 @@ export function Checkout(): JSX.Element {
       clear();
       setOrder(created);
     } catch (err) {
+      if (err instanceof ApiError && err.status === 400 && err.detail) {
+        const mapped = mapBackendDetail(err.detail);
+        if (Object.keys(mapped).length > 0) {
+          setFieldErrors(mapped);
+          setStep(1);
+          return;
+        }
+      }
       setError(
         err instanceof ApiError && err.status === 402
           ? "Tarjeta rechazada (simulación). Prueba con otra tarjeta."
@@ -136,9 +272,49 @@ export function Checkout(): JSX.Element {
     }
   }
 
-  function set(field: keyof typeof form) {
-    return (e: React.ChangeEvent<HTMLInputElement>) =>
+  function set(field: AddressField) {
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
+      if (field === "email") setEmailSuggestion(null);
+      setFieldErrors((prev) => {
+        if (!prev[field]) return prev;
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    };
+  }
+
+  function submitStep1(e: FormEvent): void {
+    e.preventDefault();
+    const { errors, normalized } = validateAddress(form);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setEmailSuggestion(null);
+      return;
+    }
+    setForm(normalized);
+    setFieldErrors({});
+    const suggestion = suggestEmail(normalized.email);
+    if (suggestion) {
+      // No bloquea: el usuario decide si la aplica o continúa igual.
+      setEmailSuggestion(suggestion);
+      return;
+    }
+    setEmailSuggestion(null);
+    setStep(2);
+  }
+
+  function applyEmailSuggestion(): void {
+    if (!emailSuggestion) return;
+    setForm((prev) => ({ ...prev, email: emailSuggestion }));
+    setEmailSuggestion(null);
+    setStep(2);
+  }
+
+  function dismissEmailSuggestion(): void {
+    setEmailSuggestion(null);
+    setStep(2);
   }
 
   function setCardField(field: keyof typeof card) {
@@ -163,64 +339,134 @@ export function Checkout(): JSX.Element {
         ) : step === 1 ? (
           <div className="mt-8 grid max-w-2xl gap-4">
             <p className="text-sm text-ink/60">Paso 1 de 2: tus datos</p>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setStep(2);
-              }}
-              className="flex flex-col gap-4"
-            >
+            <form onSubmit={submitStep1} noValidate className="flex flex-col gap-4">
               <label className="flex flex-col gap-1 text-sm">
                 Nombre
                 <input
                   aria-label="Nombre"
+                  aria-invalid={Boolean(fieldErrors.name)}
+                  aria-describedby={
+                    fieldErrors.name ? "name-error" : undefined
+                  }
                   className={inputCls}
                   value={form.name}
                   onChange={set("name")}
+                  maxLength={ADDRESS_MAX.name}
                   required
                 />
+                {fieldErrors.name && (
+                  <p id="name-error" role="alert" className="text-sm text-red-700">
+                    {fieldErrors.name}
+                  </p>
+                )}
               </label>
               <label className="flex flex-col gap-1 text-sm">
                 Email
                 <input
                   aria-label="Email"
                   type="email"
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  aria-describedby={
+                    fieldErrors.email ? "email-error" : undefined
+                  }
                   className={inputCls}
                   value={form.email}
                   onChange={set("email")}
+                  maxLength={ADDRESS_MAX.email}
                   required
                 />
+                {fieldErrors.email && (
+                  <p id="email-error" role="alert" className="text-sm text-red-700">
+                    {fieldErrors.email}
+                  </p>
+                )}
               </label>
+              {emailSuggestion && (
+                <div
+                  aria-live="polite"
+                  className="rounded-xl border border-line bg-white px-4 py-3 text-sm"
+                >
+                  <p>
+                    ¿Quisiste decir{" "}
+                    <strong>{emailSuggestion}</strong>?
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-3">
+                    <Button variant="secondary" onClick={applyEmailSuggestion}>
+                      Usar esta dirección
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={dismissEmailSuggestion}
+                      className="text-sm text-ink/70 hover:underline"
+                    >
+                      Continuar igualmente
+                    </button>
+                  </div>
+                </div>
+              )}
               <label className="flex flex-col gap-1 text-sm">
                 Dirección
                 <input
                   aria-label="Dirección"
+                  aria-invalid={Boolean(fieldErrors.address)}
+                  aria-describedby={
+                    fieldErrors.address ? "address-error" : undefined
+                  }
                   className={inputCls}
                   value={form.address}
                   onChange={set("address")}
+                  maxLength={ADDRESS_MAX.address}
                   required
                 />
+                {fieldErrors.address && (
+                  <p id="address-error" role="alert" className="text-sm text-red-700">
+                    {fieldErrors.address}
+                  </p>
+                )}
               </label>
               <div className="grid grid-cols-2 gap-4">
                 <label className="flex flex-col gap-1 text-sm">
                   Ciudad
                   <input
                     aria-label="Ciudad"
+                    aria-invalid={Boolean(fieldErrors.city)}
+                    aria-describedby={
+                      fieldErrors.city ? "city-error" : undefined
+                    }
                     className={inputCls}
                     value={form.city}
                     onChange={set("city")}
+                    maxLength={ADDRESS_MAX.city}
                     required
                   />
+                  {fieldErrors.city && (
+                    <p id="city-error" role="alert" className="text-sm text-red-700">
+                      {fieldErrors.city}
+                    </p>
+                  )}
                 </label>
                 <label className="flex flex-col gap-1 text-sm">
                   Código postal
                   <input
                     aria-label="Código postal"
+                    inputMode="numeric"
+                    pattern="[0-9]{5}"
+                    title="5 dígitos, p. ej. 28004"
+                    aria-invalid={Boolean(fieldErrors.postalCode)}
+                    aria-describedby={
+                      fieldErrors.postalCode ? "postalCode-error" : undefined
+                    }
                     className={inputCls}
                     value={form.postalCode}
                     onChange={set("postalCode")}
+                    maxLength={ADDRESS_MAX.postalCode}
                     required
                   />
+                  {fieldErrors.postalCode && (
+                    <p id="postalCode-error" role="alert" className="text-sm text-red-700">
+                      {fieldErrors.postalCode}
+                    </p>
+                  )}
                 </label>
               </div>
               <div>
