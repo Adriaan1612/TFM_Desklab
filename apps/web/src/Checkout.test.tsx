@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -157,7 +157,7 @@ describe("Checkout", () => {
 
   it("blocks pay with invalid card data", async () => {
     localStorage.setItem("desklab-cart", JSON.stringify([line]));
-    const fetchMock = vi.fn(() =>
+    const fetchMock = vi.fn((_url: string) =>
       Promise.resolve({ ok: true, json: () => Promise.resolve({}) }),
     );
     vi.stubGlobal("fetch", fetchMock);
@@ -166,12 +166,14 @@ describe("Checkout", () => {
     await screen.findByText("Paso 2 de 2: pago simulado");
     fillCard("4242 4242 4242 4241");
     expect(screen.getByText("Pagar ahora")).toBeDisabled();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(
+      fetchMock.mock.calls.some(([url]) => String(url).includes("/checkout")),
+    ).toBe(false);
   });
 
   it("stays on step 1 with inline errors for blank name and bad postal code", () => {
     localStorage.setItem("desklab-cart", JSON.stringify([line]));
-    const fetchMock = vi.fn(() =>
+    const fetchMock = vi.fn((_url: string) =>
       Promise.resolve({ ok: true, json: () => Promise.resolve({}) }),
     );
     vi.stubGlobal("fetch", fetchMock);
@@ -197,7 +199,9 @@ describe("Checkout", () => {
       screen.getByText("El código postal debe tener 5 dígitos (p. ej. 28004)."),
     ).toBeInTheDocument();
     expect(screen.getByText("Paso 1 de 2: tus datos")).toBeInTheDocument();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(
+      fetchMock.mock.calls.some(([url]) => String(url).includes("/checkout")),
+    ).toBe(false);
     expect(screen.getByLabelText("Nombre")).toHaveAttribute(
       "aria-invalid",
       "true",
@@ -251,8 +255,11 @@ describe("Checkout", () => {
     fillCard();
     fireEvent.click(screen.getByText("Pagar ahora"));
     await screen.findByRole("heading", { name: "Pedido #7" });
+    const checkoutCall = fetchMock.mock.calls.find(([url]) =>
+      String(url).includes("/checkout"),
+    );
     const sentBody = JSON.parse(
-      (fetchMock.mock.calls[0]?.[1] as { body?: string })?.body ?? "{}",
+      (checkoutCall?.[1] as { body?: string })?.body ?? "{}",
     ) as { email?: string };
     expect(sentBody.email).toBe("test@desklab.es");
   });
@@ -359,5 +366,55 @@ describe("Checkout", () => {
     renderCheckout();
     fillStep1WithEmail("usuario@empresa.co");
     expect(screen.queryByText(/¿Quisiste decir/i)).not.toBeInTheDocument();
+  });
+
+  it("warns when the catalog price changed since adding to cart", async () => {
+    localStorage.setItem("desklab-cart", JSON.stringify([line]));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (url.includes("/products")) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                data: [{ ...line.product, priceCents: 99900 }],
+                page: 1,
+                pageSize: 50,
+                total: 1,
+              }),
+          });
+        }
+        return Promise.resolve({ ok: false, status: 500 });
+      }),
+    );
+    renderCheckout();
+    expect(
+      await screen.findByText(/los precios han cambiado/i),
+    ).toBeInTheDocument();
+  });
+
+  it("shows no price warning when prices match", async () => {
+    localStorage.setItem("desklab-cart", JSON.stringify([line]));
+    const fetchMock = vi.fn((url: string) => {
+      if (url.includes("/products")) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: [line.product],
+              page: 1,
+              pageSize: 50,
+              total: 1,
+            }),
+        });
+      }
+      return Promise.resolve({ ok: false, status: 500 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    renderCheckout();
+    await screen.findByText("Paso 1 de 2: tus datos");
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(screen.queryByText(/los precios han cambiado/i)).not.toBeInTheDocument();
   });
 });

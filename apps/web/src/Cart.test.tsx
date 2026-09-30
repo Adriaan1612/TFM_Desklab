@@ -72,4 +72,19 @@ describe("CartDrawer", () => {
     fireEvent.click(screen.getByText("Quitar"));
     expect(screen.getByText("Tu carrito está vacío.")).toBeInTheDocument();
   });
+
+  it("caps quantity at 99 with a notice and disabled increment", () => {
+    localStorage.setItem(
+      "desklab-cart",
+      JSON.stringify([{ ...line, quantity: 99 }]),
+    );
+    renderDrawer();
+    expect(screen.getByLabelText("Cantidad")).toHaveTextContent("99");
+    expect(
+      screen.getByLabelText("Añadir uno de Teclado mecánico 75%"),
+    ).toBeDisabled();
+    expect(
+      screen.getByText("Máximo 99 unidades por línea."),
+    ).toBeInTheDocument();
+  });
 });

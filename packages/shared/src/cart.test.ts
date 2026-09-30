@@ -53,4 +53,13 @@ describe("cart helpers", () => {
     lines = removeLine(addLine([], p), p.id);
     expect(lines).toHaveLength(0);
   });
+
+  it("caps quantities at 99 per line", () => {
+    const p = product();
+    let lines = setQty(addLine([], p), p.id, 500);
+    expect(lines[0].quantity).toBe(99);
+    lines = setQty(lines, p.id, 99);
+    lines = addLine(lines, p);
+    expect(lines[0].quantity).toBe(99);
+  });
 });

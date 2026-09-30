@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMyOrders } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
@@ -5,12 +6,22 @@ import { Button, Card, Container, Price } from "../design-system";
 
 export function Cuenta(): JSX.Element {
   const { user, loading, logout } = useAuth();
+  const [logoutError, setLogoutError] = useState<string | null>(null);
   const orders = useQuery({
-    queryKey: ["my-orders"],
+    queryKey: ["my-orders", user?.id],
     queryFn: fetchMyOrders,
     enabled: user !== null,
     retry: false,
   });
+
+  async function handleLogout(): Promise<void> {
+    setLogoutError(null);
+    try {
+      await logout();
+    } catch {
+      setLogoutError("No hemos podido cerrar la sesión. Inténtalo de nuevo.");
+    }
+  }
 
   return (
     <Container>
@@ -33,13 +44,22 @@ export function Cuenta(): JSX.Element {
               <p className="text-ink/70">
                 {user.name} · {user.email}
               </p>
-              <Button variant="secondary" onClick={() => void logout()}>
+              <Button variant="secondary" onClick={() => void handleLogout()}>
                 Salir
               </Button>
             </div>
+            {logoutError && (
+              <p className="mt-4" role="alert">
+                {logoutError}
+              </p>
+            )}
             <h2 className="mt-10 font-display text-xl font-semibold">
               Mis pedidos
             </h2>
+            <p className="mt-2 text-sm text-ink/60">
+              Los pedidos realizados como invitado (sin entrar) no aparecen
+              aquí.
+            </p>
             {orders.isPending && <p className="mt-4">Cargando pedidos…</p>}
             {orders.isError && (
               <p className="mt-4" role="alert">
@@ -61,7 +81,7 @@ export function Cuenta(): JSX.Element {
                     </div>
                     <ul className="mt-2 text-sm text-ink/70">
                       {order.items.map((item) => (
-                        <li key={item.productId}>
+                        <li key={`${item.productId}-${item.setupSlug ?? "solo"}`}>
                           {item.name} × {item.quantity}
                         </li>
                       ))}
