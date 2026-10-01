@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import type { ReactNode } from "react";
 import { fetchProducts } from "../api/client";
@@ -235,9 +236,10 @@ function Pagination({
   const to = Math.min(page * pageSize, total);
 
   function go(next: number): void {
+    const clamped = Math.min(Math.max(next, 1), totalPages);
     setParams((prev) => {
       const updated = new URLSearchParams(prev);
-      updated.set("page", String(next));
+      updated.set("page", String(clamped));
       return updated;
     });
   }
@@ -271,7 +273,7 @@ function Pagination({
 }
 
 export function Catalog(): JSX.Element {
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const location = useLocation();
   const query = params.toString();
 
@@ -282,7 +284,32 @@ export function Catalog(): JSX.Element {
       if (!api.get("pageSize")) api.set("pageSize", String(DEFAULT_PAGE_SIZE));
       return fetchProducts(api.toString());
     },
+    // Mantiene la parrilla anterior al cambiar filtros: el aviso
+    // "Actualizando…" da feedback en vez de un skeleton completo.
+    placeholderData: keepPreviousData,
   });
+
+  // Corrige ?page=999 y similares: vuelve a la última página válida.
+  const requestedPage = Number(params.get("page") ?? "1");
+  useEffect(() => {
+    if (!products.data || products.data.total === 0) return;
+    const totalPages = Math.max(
+      1,
+      Math.ceil(products.data.total / products.data.pageSize),
+    );
+    if (requestedPage > totalPages) {
+      setParams(
+        (prev) => {
+          const updated = new URLSearchParams(prev);
+          updated.set("page", String(totalPages));
+          return updated;
+        },
+        { replace: true },
+      );
+    }
+  }, [products.data, requestedPage, setParams]);
+
+  const refreshing = products.isFetching && !products.isPending;
 
   return (
     <Container>
@@ -319,6 +346,7 @@ export function Catalog(): JSX.Element {
               {products.data.total === 1
                 ? "1 producto"
                 : `${products.data.total} productos`}
+              {refreshing ? " · Actualizando…" : ""}
             </p>
           )}
           {products.data && products.data.total === 0 && (
@@ -328,7 +356,10 @@ export function Catalog(): JSX.Element {
           )}
           {products.data && products.data.total > 0 && (
             <>
-              <div className="mt-4 grid gap-6 md:grid-cols-3">
+              <div
+                className="mt-4 grid gap-6 md:grid-cols-3"
+                aria-busy={refreshing ? true : undefined}
+              >
                 {products.data.data.map((product) => (
                   <Card key={product.id}>
                     <ProductImage

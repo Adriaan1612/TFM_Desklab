@@ -189,6 +189,10 @@ export function SetupDetail(): JSX.Element {
                 <Price cents={total} />
               </p>
             </div>
+            <p className="mt-2 text-sm text-ink/60">
+              La personalización es temporal: solo se guarda lo que añadas al
+              carrito.
+            </p>
 
             <div className="mt-6">
               <SetupImage slug={setup.data.slug} name={setup.data.name} />
@@ -218,7 +222,7 @@ export function SetupDetail(): JSX.Element {
               >
                 Añadir setup al carrito
               </Button>
-              <Button to="/" variant="secondary">
+              <Button to="/setups" variant="secondary">
                 Seguir explorando
               </Button>
             </div>
