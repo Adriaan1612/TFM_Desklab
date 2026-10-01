@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -101,11 +101,59 @@ describe("ProductDetail", () => {
       "href",
       "/catalogo",
     );
-    expect(screen.getByText("Night Shift")).toBeInTheDocument();
+    expect(screen.getByText("Night Shift")).toHaveAttribute(
+      "href",
+      "/setup/night-shift",
+    );
     expect(screen.getByText("Teclado RGB TKL")).toHaveAttribute(
       "href",
       "/producto/teclado-rgb-tkl",
     );
+  });
+
+  it("retries loading the product after a server error", async () => {
+    let calls = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        calls += 1;
+        if (url.includes("/products/") && calls === 1) {
+          return Promise.resolve({ ok: false, status: 500 });
+        }
+        if (url.endsWith("/setups") || url.endsWith("/substitutes")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ data: [] }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(product),
+        });
+      }),
+    );
+    render(
+      <QueryClientProvider
+        client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+      >
+        <MemoryRouter
+          initialEntries={[{ pathname: "/producto/teclado-mecanico-75" }]}
+        >
+          <CartProvider>
+            <Routes>
+              <Route path="/producto/:slug" element={<ProductDetail />} />
+            </Routes>
+          </CartProvider>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    expect(
+      await screen.findByText(/no hemos podido cargar el producto/i),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Reintentar"));
+    expect(
+      await screen.findByRole("heading", { name: "Teclado mecánico 75%" }),
+    ).toBeInTheDocument();
   });
 
   it("shows not-found for unknown slug", async () => {

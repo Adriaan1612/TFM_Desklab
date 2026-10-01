@@ -58,11 +58,20 @@ export function ProductDetail(): JSX.Element {
 
         {product.isPending && <p className="mt-6">Cargando producto…</p>}
         {product.isError && (
-          <p className="mt-6" role="alert">
-            {product.error instanceof ApiError && product.error.status === 404
-              ? "Este producto no existe."
-              : "No hemos podido cargar el producto. Inténtalo de nuevo más tarde."}
-          </p>
+          <div className="mt-6">
+            <p role="alert">
+              {product.error instanceof ApiError && product.error.status === 404
+                ? "Este producto no existe."
+                : "No hemos podido cargar el producto. Inténtalo de nuevo más tarde."}
+            </p>
+            {!(product.error instanceof ApiError && product.error.status === 404) && (
+              <div className="mt-4">
+                <Button variant="secondary" onClick={() => product.refetch()}>
+                  Reintentar
+                </Button>
+              </div>
+            )}
+          </div>
         )}
 
         {product.data && (
@@ -124,7 +133,12 @@ export function ProductDetail(): JSX.Element {
                   {setups.data.data.map((setup) => (
                     <Card key={setup.id}>
                       <h3 className="font-display text-lg font-semibold">
-                        {setup.name}
+                        <Link
+                          to={`/setup/${setup.slug}`}
+                          className="hover:underline"
+                        >
+                          {setup.name}
+                        </Link>
                       </h3>
                       <p className="mt-2 text-sm text-ink/60">
                         {setup.items.length} productos ·{" "}

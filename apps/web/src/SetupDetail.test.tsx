@@ -145,4 +145,17 @@ describe("SetupDetail", () => {
     expect(await screen.findByText("438,00 €")).toBeInTheDocument();
     expect(screen.getByText("1 cambios")).toBeInTheDocument();
   });
+
+  it("notes ephemeral customization and links back to setups", async () => {
+    mockSetupApi();
+    renderDetail();
+    await screen.findByRole("heading", { name: "Night Shift" });
+    expect(
+      screen.getByText(/la personalización es temporal/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Seguir explorando")).toHaveAttribute(
+      "href",
+      "/setups",
+    );
+  });
 });

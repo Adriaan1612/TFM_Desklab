@@ -34,6 +34,8 @@ const VALUES = [
 
 export function Home(): JSX.Element {
   const setups = useQuery({ queryKey: ["setups"], queryFn: fetchSetups });
+  const heroSlug = setups.data?.data[0]?.slug ?? "the-calm-desk";
+  const heroName = setups.data?.data[0]?.name ?? "The Calm Desk";
 
   return (
     <Container>
@@ -57,11 +59,11 @@ export function Home(): JSX.Element {
           </div>
         </div>
         <Link
-          to="/setup/the-calm-desk"
-          aria-label="Ver setup The Calm Desk"
+          to={`/setup/${heroSlug}`}
+          aria-label={`Ver setup ${heroName}`}
           className="block"
         >
-          <SetupImage slug="the-calm-desk" name="The Calm Desk" />
+          <SetupImage slug={heroSlug} name={heroName} />
         </Link>
       </section>
 
@@ -75,7 +77,7 @@ export function Home(): JSX.Element {
               <Link
                 to={`/catalogo?style=${c.style}`}
                 className="group block"
-                aria-label={`Ver setups de estilo ${c.style}`}
+                aria-label={`Ver productos de estilo ${c.style}`}
               >
                 <h3 className="flex items-center justify-between font-display text-lg font-semibold">
                   {c.style}

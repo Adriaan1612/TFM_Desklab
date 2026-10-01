@@ -124,4 +124,78 @@ describe("Catalog states", () => {
     expect(lastCall).toContain("sort=price");
     expect(lastCall).toContain("order=asc");
   });
+
+  it("shows refreshing state on background refetch", async () => {
+    const product = {
+      id: "1",
+      slug: "teclado-mecanico-75",
+      name: "Teclado mecánico 75%",
+      category: "Peripherals",
+      slot: "Keyboard",
+      styles: ["Minimal"],
+      uses: ["Work"],
+      priceCents: 12900,
+      imageUrl: null,
+    };
+    let calls = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => {
+        calls += 1;
+        if (calls === 1) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                data: [product],
+                page: 1,
+                pageSize: 12,
+                total: 1,
+              }),
+          });
+        }
+        return new Promise(() => {});
+      }),
+    );
+    renderCatalog();
+    await screen.findByText("Teclado mecánico 75%");
+    fireEvent.change(screen.getByLabelText("Ordenar"), {
+      target: { value: "price-asc" },
+    });
+    expect(await screen.findByText(/Actualizando…/)).toBeInTheDocument();
+  });
+
+  it("corrects an out-of-range page to the last valid one", async () => {
+    const product = {
+      id: "1",
+      slug: "teclado-mecanico-75",
+      name: "Teclado mecánico 75%",
+      category: "Peripherals",
+      slot: "Keyboard",
+      styles: ["Minimal"],
+      uses: ["Work"],
+      priceCents: 12900,
+      imageUrl: null,
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        const page = Number(
+          new URL(url, "http://localhost").searchParams.get("page") ?? "1",
+        );
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: [product],
+              page,
+              pageSize: 12,
+              total: 2,
+            }),
+        });
+      }),
+    );
+    renderCatalog("/catalogo?page=999");
+    expect(await screen.findByText("Mostrando 1–2 de 2")).toBeInTheDocument();
+  });
 });

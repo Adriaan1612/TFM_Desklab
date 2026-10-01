@@ -11,6 +11,7 @@ import { CrearMiSetup } from "./pages/CrearMiSetup";
 import { Cuenta } from "./pages/Cuenta";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
+import { NotFound } from "./pages/NotFound";
 import { Registro } from "./pages/Registro";
 import { ProductDetail } from "./pages/ProductDetail";
 import { SetupDetail } from "./pages/SetupDetail";
@@ -159,6 +160,7 @@ export default function App(): JSX.Element {
                 <Route path="/registro" element={<Registro />} />
                 <Route path="/cuenta" element={<Cuenta />} />
                 <Route path="/crear-mi-setup" element={<CrearMiSetup />} />
+              <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
             <Footer />

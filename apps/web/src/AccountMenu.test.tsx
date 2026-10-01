@@ -10,7 +10,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 
-function renderApp(me: unknown): void {
+function renderApp(me: unknown, setups: unknown[] = []): void {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -21,6 +21,12 @@ function renderApp(me: unknown): void {
         return me
           ? Promise.resolve({ ok: true, json: () => Promise.resolve({ user: me }) })
           : Promise.resolve({ ok: false, status: 401 });
+      }
+      if (url.endsWith("/setups")) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ data: setups }),
+        });
       }
       return Promise.resolve({
         ok: true,
@@ -97,7 +103,7 @@ describe("Home sections", () => {
     renderApp(null);
     expect(await screen.findByText("Explora por estilo")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /ver setups de estilo minimal/i }),
+      screen.getByRole("link", { name: /ver productos de estilo minimal/i }),
     ).toHaveAttribute("href", "/catalogo?style=Minimal");
     expect(screen.getByText("Crear mi setup con IA")).toHaveAttribute(
       "href",
@@ -112,5 +118,40 @@ describe("Home sections", () => {
     const img = await screen.findByAltText("The Calm Desk");
     expect(img).toHaveAttribute("src", "/img/setups/the-calm-desk.webp");
     expect(img.closest("a")).toHaveAttribute("href", "/setup/the-calm-desk");
+  });
+
+  it("points the hero to the first setup when available", async () => {
+    window.history.pushState({}, "", "/");
+    renderApp(null, [
+      {
+        id: "s1",
+        slug: "night-shift",
+        name: "Night Shift",
+        style: "Dark",
+        use: "Work",
+        items: [],
+        totalCents: 10000,
+      },
+    ]);
+    const hero = await screen.findByRole("link", {
+      name: "Ver setup Night Shift",
+    });
+    expect(hero).toHaveAttribute("href", "/setup/night-shift");
+  });
+});
+
+describe("NotFound", () => {
+  it("shows 404 with links for unknown urls", async () => {
+    window.history.pushState({}, "", "/ruta-que-no-existe");
+    renderApp(null);
+    expect(
+      await screen.findByText("Página no encontrada"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Volver al inicio")).toHaveAttribute("href", "/");
+    expect(screen.getByText("Explorar el catálogo")).toHaveAttribute(
+      "href",
+      "/catalogo",
+    );
+    window.history.pushState({}, "", "/");
   });
 });
