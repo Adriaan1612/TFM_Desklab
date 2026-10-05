@@ -34,13 +34,14 @@ Arranque y estructura: ver `README.md`.
 
 ## Docs
 - `docs/product.md` — qué es DeskLab y qué debe hacer (fuente única de alcance).
-- `docs/data-model.md` — entidades y relaciones (TBD hasta su fase).
-- `docs/api.md` — endpoints (TBD hasta su fase).
-- `docs/design-system.md` — diseño (TBD hasta su fase).
-- `docs/ai.md` — comportamiento de la IA (TBD hasta su fase).
+- `docs/data-model.md` — entidades y relaciones.
+- `docs/api.md` — endpoints.
+- `docs/design-system.md` — diseño.
+- `docs/ai.md` — comportamiento de la IA.
 - `docs/architecture.md` — arquitectura base del monorepo.
 
-## Roadmap
+## Roadmap (histórico)
+
 1. Arquitectura y modelo de datos
 2. Backend/API
 3. Design system y frontend
@@ -50,3 +51,6 @@ Arranque y estructura: ver `README.md`.
 7. Cuenta
 8. IA
 9. Testing y documentación
+
+> Estado actual: fases 1–9 completadas, más Fase 12 (contenido visual)
+> y Fases 13.1–13.4 (QA y estabilización). Ver `README.md`.

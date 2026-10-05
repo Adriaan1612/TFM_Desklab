@@ -1,9 +1,10 @@
-# API — Fase 3 (lectura + substitutes)
+# API — estado actual (lectura, checkout, auth, pedidos e IA)
 
 Base: `http://localhost:3001`. Contratos en `packages/shared`
 (`ProductDTO`, `SetupDTO` con `totalCents` calculado). Errores:
-`{ error: { code, message } }` con `BAD_REQUEST` (400), `NOT_FOUND` (404)
-o `INVALID_SLOT` (400).
+`{ error: { code, message } }` con `BAD_REQUEST` (400), `UNAUTHENTICATED`
+(401), `PAYMENT_DECLINED` (402), `NOT_FOUND` (404), `EMAIL_TAKEN` (409),
+`INVALID_SLOT` (400), `AI_UNAVAILABLE` (503) o `AI_INVALID` (502).
 
 ## GET /products
 
@@ -46,21 +47,22 @@ Un setup completo o 404.
 del mismo slot excluyendo el actual (`{ data: ProductDTO[] }`).
 Regla MVP sin compatibilidad avanzada.
 
-## Fuera de esta fase
+## Notas de modelo
 
-Cuentas y auth, IA. Sin cambios de modelo salvo
-`Product.slot` (requerido por substitutes, migración
-`20260907184631_add_product_slot`).
+Sin cambios de modelo salvo `Product.slot` (requerido por substitutes,
+migración `20260907184631_add_product_slot`).
 
-## POST /checkout (Fase 7, pago simulado en Fase 10)
+## POST /checkout (pedido simulado con pago simulado)
 
 Alta de pedido simulado para invitado. El cliente envía solo
 identificadores y cantidades; precios y total se calculan en servidor.
-`email` válido, `name`/`address`/`city`/`postalCode`, `payment.last4`
-(4 dígitos) e `items` (`productId`, `quantity` 1–99, `setupSlug?`)
-requeridos. 404 si un producto no existe. Responde `201` con la Order
-(`orderNumber` autoincremental, `totalCents`, items con snapshot de
-nombre y precio).
+`email` válido (con trim, máx. 160), `name`/`address`/`city`
+(trim, máx. 120/200/120), `postalCode` español de 5 dígitos,
+`payment.last4` (4 dígitos) e `items` (`productId`, `quantity` 1–99,
+`setupSlug?`) requeridos. 404 si un producto no existe. Responde `201`
+con la Order (`orderNumber` autoincremental, `totalCents`, items con
+snapshot de nombre y precio). El detalle del 400 (`campo: motivo; …`)
+lo consume el frontend para errores por campo.
 
 Pasarela simulada (`chargeSimulated`, sin red ni persistencia): solo viajan
 los últimos 4 dígitos y no se guarda ningún dato de tarjeta (ni siquiera
@@ -68,12 +70,12 @@ los últimos 4 dígitos y no se guarda ningún dato de tarjeta (ni siquiera
 `402 PAYMENT_DECLINED` sin crear pedido. Tarjetas de prueba: cualquiera
 válida por Luhn aprueba salvo `…0002`.
 
-## GET /orders/:id (Fase 7)
+## GET /orders/:id
 
-Devuelve un pedido (simplificación de invitado hasta la fase de cuenta)
-o 404.
+Devuelve un pedido (los de invitado siguen accesibles por id; los que
+tienen dueño exigen propiedad) o 404.
 
-## Auth por cookie de sesión (Fase 8)
+## Auth por cookie de sesión
 
 Sesión en `Session` con cookie `desklab_session` HttpOnly (`SameSite=Lax`,
 30 días; `Secure` solo con `COOKIE_SECURE=true` en producción).
@@ -86,7 +88,7 @@ Sin token en `localStorage`: el frontend consulta `GET /auth/me`.
 - `GET /auth/me` → usuario o 401.
 - Contraseñas con scrypt de Node. Sin reset ni rate-limit (no-objetivos TFM).
 
-## GET /orders (Fase 8)
+## GET /orders
 
 Pedidos del usuario de la sesión (401 sin sesión). `POST /checkout`
 vincula `userId` solo si hay sesión (sin backfill de invitados);
