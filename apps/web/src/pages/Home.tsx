@@ -51,7 +51,7 @@ export function Home(): JSX.Element {
             Descubre setups de escritorio coherentes, explora el catálogo y
             monta un espacio calmado que encaje contigo.
           </p>
-          <div className="mt-10 flex gap-3">
+          <div className="mt-10 flex flex-wrap gap-3">
             <Button to="/catalogo">Explorar catálogo</Button>
             <Button to="/setups" variant="secondary">
               Ver setups

@@ -141,4 +141,101 @@ describe("CrearMiSetup", () => {
       await screen.findByText(/la IA no está disponible/i),
     ).toBeInTheDocument();
   });
+
+  it("offers retry and setups escape on 502 and 400", async () => {
+    const fetchMock = vi.fn((_url: string) =>
+      Promise.resolve({ ok: false, status: 502 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    renderPage();
+    fireEvent.click(screen.getByText("Generar mi setup"));
+    expect(
+      await screen.findByText(/no hemos podido generar un setup válido/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("o explora los setups publicados"),
+    ).toHaveAttribute("href", "/setups");
+    const budget = screen.getByLabelText("Presupuesto en euros");
+    fireEvent.click(screen.getByText("Probar de nuevo"));
+    await screen.findByText(/no hemos podido generar un setup válido/i);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(budget).toHaveValue(800);
+  });
+
+  it("blocks invalid budgets without calling the API", () => {
+    const fetchMock = vi.fn((_url: string) =>
+      Promise.resolve({ ok: true, json: () => Promise.resolve({}) }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    renderPage();
+    const budget = screen.getByLabelText("Presupuesto en euros");
+    for (const value of ["", "abc", "-5", "40"]) {
+      fireEvent.change(budget, { target: { value } });
+      fireEvent.click(screen.getByText("Generar mi setup"));
+      expect(
+        screen.getByText("Escribe un presupuesto válido (mínimo 50 €)."),
+      ).toBeInTheDocument();
+    }
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("limits the note to 500 characters with a counter", () => {
+    renderPage();
+    const note = screen.getByLabelText("Preferencia libre");
+    expect(note).toHaveAttribute("maxlength", "500");
+    fireEvent.change(note, { target: { value: "abc" } });
+    expect(screen.getByText("3/500")).toBeInTheDocument();
+  });
+
+  it("confirms after adding and ignores double clicks", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              setup: {
+                id: "ai-z",
+                slug: "ai-z",
+                name: "Mi setup IA",
+                use: "Work",
+                style: "Minimal",
+                items: [
+                  {
+                    slot: "Keyboard",
+                    product: {
+                      id: "k",
+                      slug: "teclado-mecanico-75",
+                      name: "Teclado",
+                      category: "Peripherals",
+                      slot: "Keyboard",
+                      styles: ["Minimal"],
+                      uses: ["Work"],
+                      priceCents: 12900,
+                      imageUrl: null,
+                    },
+                  },
+                ],
+                totalCents: 12900,
+              },
+              setupSlug: "ai-z",
+              explanation: "",
+            }),
+        }),
+      ),
+    );
+    renderPage();
+    fireEvent.click(screen.getByText("Generar mi setup"));
+    await screen.findByText("Tu setup recomendado");
+    const add = screen.getByText("Añadir setup al carrito");
+    fireEvent.click(add);
+    fireEvent.click(add);
+    expect(screen.getByText("Añadido ✓")).toBeDisabled();
+    const stored = JSON.parse(
+      localStorage.getItem("desklab-cart") ?? "[]",
+    ) as Array<{ quantity: number }>;
+    expect(stored).toHaveLength(1);
+    expect(stored[0].quantity).toBe(1);
+  });
 });

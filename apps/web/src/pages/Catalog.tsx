@@ -247,7 +247,7 @@ function Pagination({
   return (
     <nav
       aria-label="Paginación"
-      className="mt-8 flex items-center justify-between"
+      className="mt-8 flex flex-wrap items-center justify-between gap-4"
     >
       <p className="text-sm text-ink/60">
         Mostrando {from}–{to} de {total}

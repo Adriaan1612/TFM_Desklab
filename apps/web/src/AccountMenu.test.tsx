@@ -10,7 +10,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 
-function renderApp(me: unknown, setups: unknown[] = []): void {
+function renderApp(
+  me: unknown,
+  setups: unknown[] = [],
+  logoutOk = true,
+): void {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -21,6 +25,12 @@ function renderApp(me: unknown, setups: unknown[] = []): void {
         return me
           ? Promise.resolve({ ok: true, json: () => Promise.resolve({ user: me }) })
           : Promise.resolve({ ok: false, status: 401 });
+      }
+      if (url.endsWith("/auth/logout")) {
+        return Promise.resolve({
+          ok: logoutOk,
+          status: logoutOk ? 200 : 500,
+        });
       }
       if (url.endsWith("/setups")) {
         return Promise.resolve({
@@ -83,8 +93,7 @@ describe("AccountMenu", () => {
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
   });
 
-  it("closes with Escape and outside click", async () => {
-    renderApp({ id: "u1", email: "a@desklab.es", name: "Ada" });
+  it("closes with Escape and outside click", async () => {    renderApp({ id: "u1", email: "a@desklab.es", name: "Ada" });
     const button = await screen.findByRole("button", { name: "Menú de cuenta" });
     fireEvent.click(button);
     expect(screen.getByRole("menu")).toBeInTheDocument();
@@ -94,6 +103,30 @@ describe("AccountMenu", () => {
     expect(screen.getByRole("menu")).toBeInTheDocument();
     fireEvent.pointerDown(document.body);
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+
+  it("uses wrap layout and 44px targets in the header", async () => {
+    window.history.pushState({}, "", "/");
+    renderApp(null);
+    const nav = within(screen.getByRole("banner")).getByRole("navigation");
+    expect(nav.className).toContain("flex-wrap");
+    expect(within(nav).getByText("Catálogo")).toHaveClass("min-h-[44px]");
+    expect(
+      await screen.findByRole("link", { name: "Entrar en mi cuenta" }),
+    ).toHaveClass("h-11");
+  });
+
+  it("shows an error when header logout fails", async () => {
+    window.history.pushState({}, "", "/");
+    renderApp({ id: "u1", email: "a@desklab.es", name: "Ada" }, [], false);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Menú de cuenta" }),
+    );
+    fireEvent.click(screen.getByText("Salir", { selector: "button" }));
+    expect(
+      await screen.findByText("No hemos podido cerrar la sesión."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("menu")).toBeInTheDocument();
   });
 });
 

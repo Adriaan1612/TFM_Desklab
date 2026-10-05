@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import {
   ApiError,
@@ -29,18 +29,34 @@ export function CrearMiSetup(): JSX.Element {
   const [result, setResult] = useState<RecommendResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [added, setAdded] = useState(false);
+  const addedTimer = useRef<number | null>(null);
 
-  async function submit(e: FormEvent): Promise<void> {
-    e.preventDefault();
+  useEffect(
+    () => () => {
+      if (addedTimer.current !== null) {
+        window.clearTimeout(addedTimer.current);
+      }
+    },
+    [],
+  );
+
+  async function generate(): Promise<void> {
     setError(null);
     setResult(null);
+    setAdded(false);
+    const euros = Number(budget);
+    if (!Number.isFinite(euros) || euros < 50 || euros > 100000) {
+      setError("Escribe un presupuesto válido (mínimo 50 €).");
+      return;
+    }
     setSending(true);
     try {
       const created = await recommendSetup({
         use,
         style,
         space: space as "S" | "M" | "L",
-        budgetCents: Math.round(Number(budget) * 100),
+        budgetCents: Math.round(euros * 100),
         ...(note.trim() ? { note: note.trim() } : {}),
       });
       setResult(created);
@@ -57,6 +73,21 @@ export function CrearMiSetup(): JSX.Element {
     }
   }
 
+  function submit(e: FormEvent): Promise<void> {
+    e.preventDefault();
+    return generate();
+  }
+
+  function addResult(): void {
+    if (!result || added) return;
+    for (const item of result.setup.items) {
+      add(item.product, result.setupSlug);
+    }
+    setAdded(true);
+    if (addedTimer.current !== null) window.clearTimeout(addedTimer.current);
+    addedTimer.current = window.setTimeout(() => setAdded(false), 2000);
+  }
+
   return (
     <Container>
       <section className="py-12">
@@ -68,6 +99,7 @@ export function CrearMiSetup(): JSX.Element {
 
         <form
           onSubmit={submit}
+          noValidate
           className="mt-8 grid max-w-2xl gap-4 md:grid-cols-2"
         >
           <label className="flex flex-col gap-1 text-sm">
@@ -133,9 +165,13 @@ export function CrearMiSetup(): JSX.Element {
               aria-label="Preferencia libre"
               className={inputCls}
               rows={3}
+              maxLength={500}
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
+            <span className="text-xs text-ink/60" aria-live="polite">
+              {note.trim().length}/500
+            </span>
           </label>
           <div className="md:col-span-2">
             <Button type="submit" disabled={sending}>
@@ -145,9 +181,17 @@ export function CrearMiSetup(): JSX.Element {
         </form>
 
         {error && (
-          <p className="mt-6" role="alert">
-            {error}
-          </p>
+          <div className="mt-6">
+            <p role="alert">{error}</p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <Button variant="secondary" onClick={() => void generate()}>
+                Probar de nuevo
+              </Button>
+              <Link to="/setups" className="text-sm hover:underline">
+                o explora los setups publicados
+              </Link>
+            </div>
+          </div>
         )}
 
         {result && (
@@ -174,18 +218,12 @@ export function CrearMiSetup(): JSX.Element {
                 </Card>
               ))}
             </div>
-            <div className="mt-6 flex items-center gap-4">
+            <div className="mt-6 flex flex-wrap items-center gap-4">
               <p className="text-xl font-semibold">
                 Total: <Price cents={result.setup.totalCents} />
               </p>
-              <Button
-                onClick={() => {
-                  for (const item of result.setup.items) {
-                    add(item.product, result.setupSlug);
-                  }
-                }}
-              >
-                Añadir setup al carrito
+              <Button onClick={addResult} disabled={added}>
+                {added ? "Añadido ✓" : "Añadir setup al carrito"}
               </Button>
             </div>
           </div>
