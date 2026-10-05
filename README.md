@@ -84,7 +84,8 @@ npm run build --workspace=@desklab/web
 3. Checkout: paso 1 con código postal de 5 dígitos; paso 2 con
    `4242 4242 4242 4242` (aprueba) o terminada en `0002` (rechazo 402,
    el carrito se conserva).
-4. `/registro` → `/cuenta`: el pedido aparece en "Mis pedidos".
+4. `/registro` → `/cuenta`: crea una cuenta y comprueba la sección "Mis pedidos".
+   Para que aparezca un pedido, realiza el checkout estando autenticado.
 
 ## Docs
 
