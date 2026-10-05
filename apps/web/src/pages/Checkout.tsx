@@ -244,7 +244,7 @@ export function Checkout(): JSX.Element {
               <Price cents={order.totalCents} />
             </p>
           </div>
-          <div className="mt-8 flex gap-3">
+          <div className="mt-8 flex flex-wrap gap-3">
             <Button to="/cuenta">Ver mis pedidos</Button>
             <Button to="/" variant="secondary">
               Volver al inicio
@@ -456,7 +456,7 @@ export function Checkout(): JSX.Element {
                   </p>
                 )}
               </label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <label className="flex flex-col gap-1 text-sm">
                   Ciudad
                   <input
@@ -526,7 +526,7 @@ export function Checkout(): JSX.Element {
                 {brand !== "unknown" && (
                   <p className="text-xs text-ink/60">Marca: {brand}</p>
                 )}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <label className="flex flex-col gap-1 text-sm">
                     Mes (MM)
                     <input
@@ -573,7 +573,7 @@ export function Checkout(): JSX.Element {
                   </p>
                 )}
                 {error && <p role="alert">{error}</p>}
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <Button
                     variant="secondary"
                     onClick={() => setStep(1)}

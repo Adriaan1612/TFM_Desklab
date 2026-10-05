@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { setupTotal, swapItem, type ProductDTO, type Slot } from "@desklab/shared";
@@ -43,12 +43,12 @@ function SlotRow({
   return (
     <Card>
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <Badge label={slot} />
             {customized && <Badge label="Personalizado" />}
           </div>
-          <h3 className="mt-3 font-display text-lg font-semibold">
+          <h3 className="mt-3 truncate font-display text-lg font-semibold">
             <Link to={`/producto/${current.slug}`} className="hover:underline">
               {current.name}
             </Link>
@@ -86,8 +86,8 @@ function SlotRow({
                   key={alt.id}
                   className="flex items-center justify-between gap-4"
                 >
-                  <span className="text-sm">{alt.name}</span>
-                  <span className="flex items-center gap-3">
+                  <span className="min-w-0 flex-1 truncate text-sm">{alt.name}</span>
+                  <span className="flex shrink-0 items-center gap-3">
                     <Price cents={alt.priceCents} />
                     <Button
                       variant="secondary"
@@ -143,6 +143,28 @@ export function SetupDetail(): JSX.Element {
       delete next[slot];
       return next;
     });
+  }
+
+  const [added, setAdded] = useState(false);
+  const addedTimer = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (addedTimer.current !== null) {
+        window.clearTimeout(addedTimer.current);
+      }
+    },
+    [],
+  );
+
+  function addCurrentSetup(): void {
+    if (!setup.data || added) return;
+    for (const item of items) {
+      add(item.product, setup.data.slug);
+    }
+    setAdded(true);
+    if (addedTimer.current !== null) window.clearTimeout(addedTimer.current);
+    addedTimer.current = window.setTimeout(() => setAdded(false), 2000);
   }
 
   return (
@@ -212,15 +234,9 @@ export function SetupDetail(): JSX.Element {
               ))}
             </div>
 
-            <div className="mt-12 flex gap-3">
-              <Button
-                onClick={() => {
-                  for (const item of items) {
-                    add(item.product, setup.data.slug);
-                  }
-                }}
-              >
-                Añadir setup al carrito
+            <div className="mt-12 flex flex-wrap gap-3">
+              <Button onClick={addCurrentSetup} disabled={added}>
+                {added ? "Añadido ✓" : "Añadir setup al carrito"}
               </Button>
               <Button to="/setups" variant="secondary">
                 Seguir explorando

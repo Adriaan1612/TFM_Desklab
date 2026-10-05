@@ -22,7 +22,18 @@ const queryClient = new QueryClient();
 function AccountMenu(): JSX.Element {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [menuError, setMenuError] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+
+  async function handleMenuLogout(): Promise<void> {
+    setMenuError(null);
+    try {
+      await logout();
+      setOpen(false);
+    } catch {
+      setMenuError("No hemos podido cerrar la sesión.");
+    }
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -47,7 +58,7 @@ function AccountMenu(): JSX.Element {
       <Link
         to="/login"
         aria-label="Entrar en mi cuenta"
-        className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-ink/70 hover:text-ink"
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white text-ink/70 hover:text-ink"
       >
         <svg
           aria-hidden
@@ -69,11 +80,14 @@ function AccountMenu(): JSX.Element {
     <div ref={ref} className="relative">
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setOpen((v) => !v);
+          setMenuError(null);
+        }}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Menú de cuenta"
-        className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white font-display text-sm font-semibold"
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white font-display text-sm font-semibold"
       >
         {user.name.charAt(0).toUpperCase()}
       </button>
@@ -93,14 +107,16 @@ function AccountMenu(): JSX.Element {
           <button
             type="button"
             role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              void logout();
-            }}
+            onClick={() => void handleMenuLogout()}
             className="block w-full rounded-xl px-3 py-2 text-left hover:bg-canvas"
           >
             Salir
           </button>
+          {menuError && (
+            <p role="alert" className="px-3 py-2 text-xs text-red-700">
+              {menuError}
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -112,21 +128,27 @@ function Header(): JSX.Element {
   return (
     <header className="border-b border-line">
       <Container>
-        <nav className="flex items-center justify-between py-4">
-          <Link to="/" className="font-display text-lg font-bold">
+        <nav className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-4">
+          <Link
+            to="/"
+            className="inline-flex min-h-[44px] items-center font-display text-lg font-bold"
+          >
             DeskLab
           </Link>
-          <div className="flex items-center gap-6 text-sm">
-            <Link to="/" className="hover:underline">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+            <Link to="/" className="inline-flex min-h-[44px] items-center hover:underline">
               Inicio
             </Link>
-            <Link to="/catalogo" className="hover:underline">
+            <Link
+              to="/catalogo"
+              className="inline-flex min-h-[44px] items-center hover:underline"
+            >
               Catálogo
             </Link>
             <button
               type="button"
               onClick={openCart}
-              className="hover:underline"
+              className="inline-flex min-h-[44px] items-center hover:underline"
               aria-label={`Abrir carrito, ${count} artículos`}
             >
               Carrito ({count})

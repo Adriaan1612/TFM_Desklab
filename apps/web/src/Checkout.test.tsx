@@ -394,8 +394,7 @@ describe("Checkout", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows no price warning when prices match", async () => {
-    localStorage.setItem("desklab-cart", JSON.stringify([line]));
+  it("shows no price warning when prices match", async () => {    localStorage.setItem("desklab-cart", JSON.stringify([line]));
     const fetchMock = vi.fn((url: string) => {
       if (url.includes("/products")) {
         return Promise.resolve({
@@ -416,5 +415,35 @@ describe("Checkout", () => {
     await screen.findByText("Paso 1 de 2: tus datos");
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(screen.queryByText(/los precios han cambiado/i)).not.toBeInTheDocument();
+  });
+
+  it("stacks address and card grids on mobile", async () => {
+    localStorage.setItem("desklab-cart", JSON.stringify([line]));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: [line.product],
+              page: 1,
+              pageSize: 50,
+              total: 1,
+            }),
+        }),
+      ),
+    );
+    renderCheckout();
+    expect(
+      screen.getByLabelText("Ciudad").closest("div.grid")?.className,
+    ).toContain("sm:grid-cols-2");
+    fillStep1();
+    expect(
+      await screen.findByLabelText("CVC"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("CVC").closest("div.grid")?.className,
+    ).toContain("sm:grid-cols-3");
   });
 });

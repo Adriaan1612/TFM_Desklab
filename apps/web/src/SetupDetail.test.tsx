@@ -2,7 +2,7 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CartProvider } from "./cart/CartContext";
 import { SetupDetail } from "./pages/SetupDetail";
 
@@ -86,6 +86,11 @@ function mockSetupApi(): void {
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  localStorage.clear();
+});
+
+beforeEach(() => {
+  localStorage.clear();
 });
 
 describe("SetupDetail", () => {
@@ -157,5 +162,20 @@ describe("SetupDetail", () => {
       "href",
       "/setups",
     );
+  });
+
+  it("confirms after adding and ignores double clicks", async () => {
+    mockSetupApi();
+    renderDetail();
+    await screen.findByRole("heading", { name: "Night Shift" });
+    const add = screen.getByText("Añadir setup al carrito");
+    fireEvent.click(add);
+    fireEvent.click(add);
+    expect(screen.getByText("Añadido ✓")).toBeDisabled();
+    const stored = JSON.parse(
+      localStorage.getItem("desklab-cart") ?? "[]",
+    ) as Array<{ quantity: number }>;
+    expect(stored).toHaveLength(2);
+    expect(stored.every((l) => l.quantity === 1)).toBe(true);
   });
 });
