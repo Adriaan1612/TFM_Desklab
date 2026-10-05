@@ -1,4 +1,4 @@
-# Design system — Fase 4
+# Design system — estado actual
 
 ## Tokens
 
@@ -33,6 +33,22 @@
   carga/error/vacío.
 - `/producto/:slug` (ProductDetail): descripción editorial bajo el nombre
   (jerarquía secundaria, `text-ink/70`); no se muestra en tarjetas.
+  "Aparece en" enlaza a `/setup/:slug`; Reintentar en error no-404.
+- `/setups` + `/setup/:slug` (Setups/SetupDetail): personalización por
+  slot con aviso de temporalidad, total en vivo y "Añadido ✓" anti
+  doble-clic; "Seguir explorando" vuelve a `/setups`.
+- `/checkout` (Checkout): 2 pasos (datos + pago simulado); validación
+  espejo del backend con errores inline por campo; sugerencia no
+  bloqueante ante typos de email; aviso si los precios cambiaron.
+- `/cuenta` (Cuenta): pedidos propios, aviso de pedidos de invitado,
+  logout con error visible.
+- `/crear-mi-setup` (IA): presupuesto 50–100000 €, nota máx. 500 con
+  contador, reintento y escape a `/setups` ante error.
+- `/login`, `/registro` y `NotFound` (ruta `*` con enlaces a `/`
+  y `/catalogo`).
+- Patrones transversales: `role="alert"` en errores, `aria-busy` +
+  "Actualizando…" en recargas, tope 99 unidades por línea de carrito,
+  corrección de `?page=` fuera de rango.
 - Datos con TanStack Query (`src/api/client.ts`, tipado con los DTOs de
   `@desklab/shared`, base `VITE_API_URL` con defecto `http://localhost:3001`).
 

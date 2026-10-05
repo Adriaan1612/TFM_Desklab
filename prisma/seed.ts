@@ -1,7 +1,7 @@
-// Seed — Fase 5. Catálogo completo (32 productos) + 2 setups.
+// Seed — catálogo (32 productos) + 6 setups.
 // Todos los productos definen explícitamente category, slot, styles, uses
-// y priceCents. El catálogo crece aquí; los setups llegan en Fase 6.
-// Fuera de alcance: User, Cart, Order, SavedSetup, cuestionario IA.
+// y priceCents. El catálogo crece aquí. Ver `docs/data-model.md`.
+// Fuera de alcance: Cart, SavedSetup, cuestionario IA.
 
 import { PrismaClient } from "@prisma/client";
 
@@ -358,8 +358,7 @@ async function main(): Promise<void> {
     });
   }
 
-  // Se mantienen los 2 setups base (the-calm-desk, night-shift).
-  // Su ampliación a los 6 setups de docs/product.md queda para Fase 6.
+  // Los 6 setups de docs/product.md con sus productos.
   const setups = [
     {
       slug: "the-calm-desk",
