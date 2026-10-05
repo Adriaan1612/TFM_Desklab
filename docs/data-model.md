@@ -1,4 +1,4 @@
-# Data model — Fase 2 (catálogo + setups, lectura)
+# Data model — estado actual (catálogo, setups, checkout y cuenta)
 
 ## Entidades
 
@@ -31,29 +31,33 @@ Product 1──* SetupItem *──1 Setup
   Prisma: el frontend solo conoce `ProductDTO` / `SetupDTO` / `SetupItemDTO`.
   La persistencia puede cambiar sin romper el contrato.
 
-## Fuera de esta fase (estricto)
+## Fuera del modelo (decisión)
 
-`Cart`, `SavedSetup` y persistencia del cuestionario IA.
-El carrito vive en el frontend; los pedidos de invitado (`Order`,
-`OrderItem` con snapshot de nombre/precio y `setupSlug?`) llegan en
-la fase de carrito/checkout.
+`Cart`, `SavedSetup` y persistencia del cuestionario IA no se persisten.
+El carrito vive en el frontend (`localStorage`); los pedidos (`Order`,
+`OrderItem` con snapshot de nombre/precio y `setupSlug?`) se crean
+en `POST /checkout`.
 
-## Cuenta (Fase 8)
+## Cuenta
 
 `User` (`email` único, `name`, `passwordHash` scrypt), `Session`
 (`token` único, `expiresAt` 30 días, cascade por usuario) y
 `Order.userId?` (solo pedidos hechos logueado, sin backfill).
 Migración `20260914174204_add_users_sessions`.
 
-## Seed mínimo
+## Seed actual
 
-8 productos y 2 setups (`the-calm-desk`, `night-shift`) que validan las
-relaciones. El catálogo completo (30–40 productos) llega en la fase de
-Productos.
+32 productos y 6 setups (`the-calm-desk`, `night-shift`, `the-study`,
+`the-creator`, `green-corner`, `rgb-focus`) que validan las
+relaciones y alimentan el catálogo.
 
-## Migración inicial
+## Migraciones
 
 `20260906172734_init_catalog_setups` creada y aplicada contra PostgreSQL 16.
 `20260907184631_add_product_slot` añade `Product.slot` requerido con backfill
-por slug (nullable → UPDATE → NOT NULL). Las migraciones se versionan en Git
-(`prisma/migrations/`).
+por slug (nullable → UPDATE → NOT NULL). `20260912162537_add_orders` crea
+`Order`/`OrderItem`. `20260914174204_add_users_sessions` crea
+`User`/`Session` y `Order.userId?`.
+`20260924095042_add_product_description` añade `Product.description`
+obligatoria con backfill (nullable → UPDATE → NOT NULL).
+Las migraciones se versionan en Git (`prisma/migrations/`).

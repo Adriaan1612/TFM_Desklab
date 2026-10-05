@@ -23,9 +23,7 @@ QA funcional cerrado en Fases 13.1–13.4.
   (402) conservando el carrito. Sin cargos reales.
 - **Cuenta**: registro/login por cookie HttpOnly, pedidos propios,
   logout robusto.
-- **IA**: "Crear mi setup" guiado (uso, estilo, espacio, presupuesto,
-  nota) con validación estricta contra catálogo real y modo
-  degradado con alternativas si el proveedor falla.
+- **IA**: "Crear mi setup" guiado (uso, estilo, espacio, presupuesto, nota) con validación estricta contra catálogo real y manejo controlado de errores del proveedor.
 
 ## Stack
 
@@ -84,7 +82,9 @@ npm run build --workspace=@desklab/web
 3. Checkout: paso 1 con código postal de 5 dígitos; paso 2 con
    `4242 4242 4242 4242` (aprueba) o terminada en `0002` (rechazo 402,
    el carrito se conserva).
-4. `/registro` → `/cuenta`: el pedido aparece en "Mis pedidos".
+4. `/registro` → `/cuenta`: crea una cuenta y comprueba la sección "Mis pedidos".
+   Para que aparezca un pedido, realiza el checkout estando autenticado.
+   
 
 ## Docs
 

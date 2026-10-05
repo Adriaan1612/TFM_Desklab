@@ -13,14 +13,14 @@ Tagline: **Tu rincón, bien montado.**
 ## Qué puede hacer el usuario
 - Explorar setups completos.
 - Explorar productos individuales.
-- Filtrar productos por categoría, estilo, uso y precio.
+- Filtrar productos por categoría, estilo y uso (precio solo como ordenación).
 - Ver qué productos forman parte de cada setup.
 - Personalizar un setup, sustituyendo productos compatibles y viendo cómo cambia el precio.
 - Crear un setup mediante “Crear mi setup”, un cuestionario guiado que utiliza IA.
 - La IA debe recomendar únicamente productos reales del catálogo, nunca inventarlos.
 - Añadir productos o setups al carrito.
 - Realizar un checkout simulado.
-- Tener cuenta, pedidos y setups guardados.
+- Tener cuenta y pedidos propios.
 
 ## Catálogo
 Catálogo inicial pequeño, aproximadamente 30–40 productos.
