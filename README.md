@@ -24,8 +24,8 @@ QA funcional cerrado en Fases 13.1–13.4.
 - **Cuenta**: registro/login por cookie HttpOnly, pedidos propios,
   logout robusto.
 - **IA**: "Crear mi setup" guiado (uso, estilo, espacio, presupuesto,
-  nota) con validación estricta contra catálogo real y modo
-  degradado con alternativas si el proveedor falla.
+  nota) con validación estricta contra catálogo real y manejo controlado de errores del proveedor.
+  
 
 ## Stack
 
