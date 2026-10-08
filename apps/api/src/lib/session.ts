@@ -7,12 +7,13 @@ export const SESSION_COOKIE = "desklab_session";
 const THIRTY_DAYS_SECONDS = 30 * 24 * 60 * 60;
 
 function cookieOptions(maxAge?: number) {
+  const isProduction = process.env.NODE_ENV === "production";
+
   return {
     path: "/",
     httpOnly: true,
-    sameSite: "lax" as const,
-    // En producción servir siempre tras HTTPS con COOKIE_SECURE=true.
-    secure: process.env.COOKIE_SECURE === "true",
+    sameSite: isProduction ? ("none" as const) : ("lax" as const),
+    secure: isProduction,
     ...(maxAge === undefined ? {} : { maxAge }),
   };
 }
